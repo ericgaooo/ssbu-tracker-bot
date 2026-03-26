@@ -1,0 +1,97 @@
+{
+  "players": {
+    "406993356640616448": {
+      "user_id": "406993356640616448",
+      "username": "Eric 🍍",
+      "rank": 1,
+      "updated_at": "2026-03-26T23:52:44.474Z"
+    },
+    "1374802179021606912": {
+      "user_id": "1374802179021606912",
+      "username": "Andrew",
+      "rank": null,
+      "updated_at": "2026-03-26T23:52:23.304Z"
+    },
+    "321878319249489920": {
+      "user_id": "321878319249489920",
+      "username": "Angel Camper ⛺",
+      "rank": 4,
+      "updated_at": "2026-03-26T23:52:51.663Z"
+    }
+  },
+  "match_reports": [
+    {
+      "id": "1774552904190_buisdc4z",
+      "reporter_id": "406993356640616448",
+      "reporter_name": "Eric 🍍",
+      "opponent_id": "1374802179021606912",
+      "opponent_name": "Andrew",
+      "format": "bo5",
+      "reporter_wins": 3,
+      "opponent_wins": 0,
+      "created_at": "2026-03-26T19:21:44.190Z"
+    },
+    {
+      "id": "1774552934356_6ipamvc7",
+      "reporter_id": "406993356640616448",
+      "reporter_name": "Eric 🍍",
+      "opponent_id": "1374802179021606912",
+      "opponent_name": "Andrew",
+      "format": "bo5",
+      "reporter_wins": 3,
+      "opponent_wins": 0,
+      "created_at": "2026-03-26T19:22:14.357Z"
+    }
+  ],
+  "game_reports": [
+    {
+      "id": "1774553140996_qc8quec6",
+      "reporter_id": "406993356640616448",
+      "reporter_name": "Eric 🍍",
+      "opponent_id": "1374802179021606912",
+      "opponent_name": "Andrew",
+      "result": "win",
+      "created_at": "2026-03-26T19:25:40.996Z"
+    },
+    {
+      "id": "1774568537834_yfsl0wtn",
+      "reporter_id": "406993356640616448",
+      "reporter_name": "Eric 🍍",
+      "opponent_id": "1374802179021606912",
+      "opponent_name": "Andrew",
+      "result": "win",
+      "created_at": "2026-03-26T23:42:17.834Z"
+    },
+    {
+      "id": "1774568569935_d4udkpkt",
+      "reporter_id": "406993356640616448",
+      "reporter_name": "Eric 🍍",
+      "opponent_id": "1374802179021606912",
+      "opponent_name": "Andrew",
+      "result": "win",
+      "created_at": "2026-03-26T23:42:49.935Z"
+    },
+    {
+      "id": "1774569132348_fsjb0kgb",
+      "reporter_id": "406993356640616448",
+      "reporter_name": "Eric 🍍",
+      "opponent_id": "1374802179021606912",
+      "opponent_name": "Andrew",
+      "result": "win",
+      "created_at": "2026-03-26T23:52:12.348Z"
+    }
+  ],
+  "set_reports": [
+    {
+      "id": "1774569143304_ovwu3q42",
+      "reporter_id": "406993356640616448",
+      "reporter_name": "Eric 🍍",
+      "opponent_id": "1374802179021606912",
+      "opponent_name": "Andrew",
+      "format": "ft10",
+      "reporter_wins": 10,
+      "opponent_wins": 0,
+      "created_at": "2026-03-26T23:52:23.304Z"
+    }
+  ]
+}
