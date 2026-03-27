@@ -14,7 +14,8 @@ function ensureDataFile() {
     const initial = {
       players: {},
       set_reports: [],
-      game_reports: []
+      game_reports: [],
+      andrew_spikes: {}
     };
     fs.writeFileSync(DB_FILE, JSON.stringify(initial, null, 2), "utf8");
   }
@@ -27,6 +28,7 @@ function readDb() {
   if (!db.players) db.players = {};
   if (!db.set_reports) db.set_reports = [];
   if (!db.game_reports) db.game_reports = [];
+  if (!db.andrew_spikes) db.andrew_spikes = {};
 
   return db;
 }
@@ -151,7 +153,7 @@ function createGameReport({
     reporter_name: reporterName,
     opponent_id: opponentId,
     opponent_name: opponentName,
-    result, // "win" or "loss"
+    result,
     created_at: new Date().toISOString()
   };
 
@@ -362,6 +364,93 @@ function getLeaderboard() {
   return rankedRows;
 }
 
+function ensureAndrewSpiker(userId, username) {
+  const db = readDb();
+
+  if (!db.andrew_spikes[userId]) {
+    db.andrew_spikes[userId] = {
+      user_id: userId,
+      username,
+      count: 0,
+      updated_at: new Date().toISOString(),
+      last_spike_at: null
+    };
+  } else {
+    db.andrew_spikes[userId].username = username;
+    db.andrew_spikes[userId].updated_at = new Date().toISOString();
+  }
+
+  writeDb(db);
+  return db.andrew_spikes[userId];
+}
+
+function incrementAndrewSpike(userId, username) {
+  const db = readDb();
+
+  if (!db.andrew_spikes[userId]) {
+    db.andrew_spikes[userId] = {
+      user_id: userId,
+      username,
+      count: 0,
+      updated_at: new Date().toISOString(),
+      last_spike_at: null
+    };
+  }
+
+  db.andrew_spikes[userId].username = username;
+  db.andrew_spikes[userId].count += 1;
+  db.andrew_spikes[userId].updated_at = new Date().toISOString();
+  db.andrew_spikes[userId].last_spike_at = new Date().toISOString();
+
+  writeDb(db);
+  return db.andrew_spikes[userId];
+}
+
+function setAndrewSpikeCount(userId, username, count) {
+  const db = readDb();
+
+  if (!db.andrew_spikes[userId]) {
+    db.andrew_spikes[userId] = {
+      user_id: userId,
+      username,
+      count: 0,
+      updated_at: new Date().toISOString(),
+      last_spike_at: null
+    };
+  }
+
+  db.andrew_spikes[userId].username = username;
+  db.andrew_spikes[userId].count = Math.max(0, count);
+  db.andrew_spikes[userId].updated_at = new Date().toISOString();
+
+  writeDb(db);
+  return db.andrew_spikes[userId];
+}
+
+function getAndrewSpikeCount(userId) {
+  const db = readDb();
+  return db.andrew_spikes[userId]?.count ?? 0;
+}
+
+function getAndrewSpikeLeaderboard() {
+  const db = readDb();
+
+  const rows = Object.values(db.andrew_spikes).map((entry) => ({
+    user_id: entry.user_id,
+    username: entry.username,
+    count: entry.count ?? 0,
+    updated_at: entry.updated_at || null,
+    last_spike_at: entry.last_spike_at || null
+  }));
+
+  rows.sort((a, b) => {
+    if (b.count !== a.count) return b.count - a.count;
+    return a.username.localeCompare(b.username);
+  });
+
+  return rows;
+}
+
 module.exports = {
   ensurePlayer,
   setPlayerRank,
@@ -373,5 +462,10 @@ module.exports = {
   getReportsByReporter,
   getDerivedRecordForUser,
   getHeadToHead,
-  getLeaderboard
+  getLeaderboard,
+  ensureAndrewSpiker,
+  incrementAndrewSpike,
+  setAndrewSpikeCount,
+  getAndrewSpikeCount,
+  getAndrewSpikeLeaderboard
 };

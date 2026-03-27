@@ -102,6 +102,36 @@ const commands = [
     .setDescription("Delete one of your reports by report ID")
     .addStringOption(option =>
       option.setName("report_id").setDescription("Report ID from /smashmyreports").setRequired(true)
+    ),
+
+  new SlashCommandBuilder()
+    .setName("andrewspike")
+    .setDescription("Record that you spiked Andrew one more time"),
+
+  new SlashCommandBuilder()
+    .setName("andrewspikes")
+    .setDescription("Show your Andrew spike count"),
+
+  new SlashCommandBuilder()
+    .setName("andrewspikeleaderboard")
+    .setDescription("Show the Andrew Spiker leaderboard in text"),
+
+  new SlashCommandBuilder()
+    .setName("andrewspikeimage")
+    .setDescription("Show the Andrew Spiker leaderboard as an image"),
+
+  new SlashCommandBuilder()
+    .setName("andrewspikeanimated")
+    .setDescription("Show the Andrew Spiker leaderboard as an animated gif"),
+
+  new SlashCommandBuilder()
+    .setName("setandrewspikes")
+    .setDescription("Admin: manually set a player's Andrew spike count")
+    .addUserOption(option =>
+      option.setName("user").setDescription("Player to edit").setRequired(true)
+    )
+    .addIntegerOption(option =>
+      option.setName("count").setDescription("New Andrew spike count").setRequired(true)
     )
 ].map(command => command.toJSON());
 

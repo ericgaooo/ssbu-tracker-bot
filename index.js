@@ -16,13 +16,22 @@ const {
   getReportsByReporter,
   getDerivedRecordForUser,
   getHeadToHead,
-  getLeaderboard
+  getLeaderboard,
+  incrementAndrewSpike,
+  setAndrewSpikeCount,
+  getAndrewSpikeCount,
+  getAndrewSpikeLeaderboard
 } = require("./db");
 
 const {
   generateLeaderboardImage,
   generateAnimatedLeaderboardGif
 } = require("./leaderboardRenderer");
+
+const {
+  generateAndrewSpikeImage,
+  generateAndrewSpikeGif
+} = require("./andrewSpikeRenderer");
 
 const client = new Client({
   intents: [GatewayIntentBits.Guilds]
@@ -61,6 +70,15 @@ function normalizeFormat(format) {
     other: "Other"
   };
   return map[format] || format;
+}
+
+async function withGuildDisplayNames(guild, rows) {
+  return Promise.all(
+    rows.map(async (row) => ({
+      ...row,
+      displayName: await getDisplayNameFromGuild(guild, row.user_id, row.username)
+    }))
+  );
 }
 
 client.on("interactionCreate", async (interaction) => {
@@ -426,6 +444,149 @@ client.on("interactionCreate", async (interaction) => {
 
       await interaction.reply(
         `🗑️ Deleted ${result.type} report \`${result.report.id}\`.`
+      );
+      return;
+    }
+
+    if (interaction.commandName === "andrewspike") {
+      const user = interaction.user;
+      const displayName = await getDisplayNameFromGuild(
+        interaction.guild,
+        user.id,
+        user.globalName || user.username
+      );
+
+      const updated = incrementAndrewSpike(user.id, displayName);
+
+      const jokes = [
+        "Andrew has been sent to the shadow realm.",
+        "Another victim added to the highlight reel.",
+        "The scouting report is getting ugly.",
+        "Andrew requests a balance patch.",
+        "This is terrible for team morale."
+      ];
+
+      const joke = jokes[updated.count % jokes.length];
+
+      await interaction.reply(
+        `💥 **Andrew spike recorded for ${displayName}.**\n` +
+          `Total Andrew spikes: **${updated.count}**\n` +
+          `${joke}`
+      );
+      return;
+    }
+
+    if (interaction.commandName === "andrewspikes") {
+      const user = interaction.user;
+      const displayName = await getDisplayNameFromGuild(
+        interaction.guild,
+        user.id,
+        user.globalName || user.username
+      );
+
+      const count = getAndrewSpikeCount(user.id);
+
+      await interaction.reply(
+        `📈 **${displayName}** has **${count}** Andrew spike${count === 1 ? "" : "s"}.`
+      );
+      return;
+    }
+
+    if (interaction.commandName === "andrewspikeleaderboard") {
+      const rows = getAndrewSpikeLeaderboard();
+
+      if (rows.length === 0) {
+        await interaction.reply("No Andrew spikes have been recorded yet.");
+        return;
+      }
+
+      const lines = await Promise.all(
+        rows.map(async (row, index) => {
+          const displayName = await getDisplayNameFromGuild(
+            interaction.guild,
+            row.user_id,
+            row.username
+          );
+          return `${index + 1}. **${displayName}** — **${row.count}** spike${row.count === 1 ? "" : "s"}`;
+        })
+      );
+
+      await interaction.reply(
+        `💥 **Andrew Spiker Leaderboard**\n${lines.join("\n")}`
+      );
+      return;
+    }
+
+    if (interaction.commandName === "andrewspikeimage") {
+      const rows = getAndrewSpikeLeaderboard();
+
+      if (rows.length === 0) {
+        await interaction.reply("No Andrew spikes have been recorded yet.");
+        return;
+      }
+
+      await interaction.deferReply();
+      const rowsWithNames = await withGuildDisplayNames(interaction.guild, rows);
+      const imageBuffer = await generateAndrewSpikeImage(rowsWithNames);
+
+      const attachment = new AttachmentBuilder(imageBuffer, {
+        name: "andrew-spiker-leaderboard.png"
+      });
+
+      await interaction.editReply({
+        content: "💥 **Andrew Spiker Leaderboard**",
+        files: [attachment]
+      });
+      return;
+    }
+
+    if (interaction.commandName === "andrewspikeanimated") {
+      const rows = getAndrewSpikeLeaderboard();
+
+      if (rows.length === 0) {
+        await interaction.reply("No Andrew spikes have been recorded yet.");
+        return;
+      }
+
+      await interaction.deferReply();
+      const rowsWithNames = await withGuildDisplayNames(interaction.guild, rows);
+      const gifBuffer = await generateAndrewSpikeGif(rowsWithNames);
+
+      const attachment = new AttachmentBuilder(gifBuffer, {
+        name: "andrew-spiker-leaderboard.gif"
+      });
+
+      await interaction.editReply({
+        content: "💥 **Andrew Spiker Leaderboard**",
+        files: [attachment]
+      });
+      return;
+    }
+
+    if (interaction.commandName === "setandrewspikes") {
+      if (!ADMIN_USER_ID || interaction.user.id !== ADMIN_USER_ID) {
+        await interaction.reply("You are not allowed to set Andrew spikes.");
+        return;
+      }
+
+      const user = interaction.options.getUser("user");
+      const count = interaction.options.getInteger("count");
+
+      if (count < 0) {
+        await interaction.reply("Andrew spikes cannot be negative.");
+        return;
+      }
+
+      const displayName = await getDisplayNameFromGuild(
+        interaction.guild,
+        user.id,
+        user.globalName || user.username
+      );
+
+      const updated = setAndrewSpikeCount(user.id, displayName, count);
+
+      await interaction.reply(
+        `✅ Set **${displayName}** to **${updated.count}** Andrew spike${updated.count === 1 ? "" : "s"}.`
       );
       return;
     }
