@@ -5,20 +5,15 @@ const GIFEncoder = require("gif-encoder-2");
 
 registerFont("./assets/fonts/Nunito-Bold.ttf", {
   family: "SmashFont",
-  weight: "bold",
+  weight: "bold"
 });
 
 registerFont("./assets/fonts/Nunito-Regular.ttf", {
   family: "SmashFont",
-  weight: "normal",
+  weight: "normal"
 });
 
-const SMASH_BALL_PATH = path.join(
-  __dirname,
-  "assets",
-  "images",
-  "smash-ball.png"
-);
+const SMASH_BALL_PATH = path.join(__dirname, "assets", "images", "smash-ball.png");
 let smashBallImagePromise = null;
 
 function getSmashBallImage() {
@@ -29,11 +24,7 @@ function getSmashBallImage() {
   return smashBallImagePromise;
 }
 
-async function getDisplayNameFromGuild(
-  guild,
-  userId,
-  fallback = "Unknown Player"
-) {
+async function getDisplayNameFromGuild(guild, userId, fallback = "Unknown Player") {
   try {
     const member = await guild.members.fetch(userId);
     return member.displayName;
@@ -48,7 +39,7 @@ async function getAvatarUrlFromGuild(guild, userId) {
     return member.displayAvatarURL({
       extension: "png",
       size: 256,
-      forceStatic: true,
+      forceStatic: true
     });
   } catch {
     return null;
@@ -58,10 +49,7 @@ async function getAvatarUrlFromGuild(guild, userId) {
 function sanitizeDisplayNameForCanvas(name) {
   if (!name) return name;
   const stripped = name
-    .replace(
-      /[\p{Extended_Pictographic}\p{Emoji_Presentation}\uFE0F\u200D]/gu,
-      ""
-    )
+    .replace(/[\p{Extended_Pictographic}\p{Emoji_Presentation}\uFE0F\u200D]/gu, "")
     .replace(/\s+/g, " ")
     .trim();
   return stripped || name;
@@ -92,7 +80,7 @@ async function buildLeaderboardEntries(guild, rows) {
         place: index + 1,
         displayName,
         canvasDisplayName: sanitizeDisplayNameForCanvas(displayName),
-        avatarImage,
+        avatarImage
       };
     })
   );
@@ -152,7 +140,7 @@ function getPlacementColors(place) {
       glow: "rgba(255, 213, 74, 0.22)",
       badgeBg: "#FFE27A",
       badgeText: "#2F1A00",
-      trim: "rgba(255, 225, 140, 0.45)",
+      trim: "rgba(255, 225, 140, 0.45)"
     };
   }
 
@@ -167,7 +155,7 @@ function getPlacementColors(place) {
       glow: "rgba(221, 230, 255, 0.16)",
       badgeBg: "#EEF3FF",
       badgeText: "#1B2547",
-      trim: "rgba(221, 230, 255, 0.18)",
+      trim: "rgba(221, 230, 255, 0.18)"
     };
   }
 
@@ -182,7 +170,7 @@ function getPlacementColors(place) {
       glow: "rgba(255, 183, 138, 0.16)",
       badgeBg: "#FFD7BF",
       badgeText: "#4A2413",
-      trim: "rgba(255, 183, 138, 0.18)",
+      trim: "rgba(255, 183, 138, 0.18)"
     };
   }
 
@@ -196,7 +184,7 @@ function getPlacementColors(place) {
     glow: "rgba(124, 169, 255, 0.12)",
     badgeBg: "#213264",
     badgeText: "#F5F8FF",
-    trim: "rgba(124, 169, 255, 0.16)",
+    trim: "rgba(124, 169, 255, 0.16)"
   };
 }
 
@@ -205,7 +193,7 @@ function createParticles(width, height, count) {
     "rgba(255,213,74,0.26)",
     "rgba(255,255,255,0.22)",
     "rgba(102,227,255,0.20)",
-    "rgba(255,102,194,0.16)",
+    "rgba(255,102,194,0.16)"
   ];
 
   return Array.from({ length: count }, () => ({
@@ -219,7 +207,7 @@ function createParticles(width, height, count) {
     ampX: 1.5 + Math.random() * 4,
     ampY: 1.5 + Math.random() * 5,
     phase: Math.random() * Math.PI * 2,
-    speed: 0.18 + Math.random() * 0.14,
+    speed: 0.18 + Math.random() * 0.14
   }));
 }
 
@@ -243,74 +231,29 @@ function drawParticles(ctx, particles, phase) {
   }
 }
 
-function drawBackground(ctx, width, height, options = {}) {
-  const {
-    phase = 0,
-    animated = false,
-    particles = null,
-    smashBallImage = null,
-  } = options;
+function drawBackgroundGrid(ctx, width, height) {
+  ctx.save();
+  ctx.globalAlpha = 0.026;
+  ctx.strokeStyle = "#B4C7FF";
+  ctx.lineWidth = 1;
 
-  const bg = ctx.createLinearGradient(0, 0, width, height);
-  bg.addColorStop(0, "#050812");
-  bg.addColorStop(0.35, "#0C1430");
-  bg.addColorStop(0.7, "#140D26");
-  bg.addColorStop(1, "#06080F");
-  ctx.fillStyle = bg;
-  ctx.fillRect(0, 0, width, height);
+  const gap = 52;
 
-  const topGlow = ctx.createRadialGradient(
-    width / 2,
-    110,
-    20,
-    width / 2,
-    110,
-    240
-  );
-  topGlow.addColorStop(0, "rgba(255,213,74,0.08)");
-  topGlow.addColorStop(0.45, "rgba(255,213,74,0.03)");
-  topGlow.addColorStop(1, "rgba(255,213,74,0)");
-  ctx.fillStyle = topGlow;
-  ctx.fillRect(0, 0, width, height);
-
-  const leftGlow = ctx.createRadialGradient(110, 190, 10, 110, 190, 210);
-  leftGlow.addColorStop(0, "rgba(255,90,189,0.05)");
-  leftGlow.addColorStop(1, "rgba(255,90,189,0)");
-  ctx.fillStyle = leftGlow;
-  ctx.fillRect(0, 0, width, height);
-
-  const rightGlow = ctx.createRadialGradient(
-    width - 110,
-    180,
-    10,
-    width - 110,
-    180,
-    210
-  );
-  rightGlow.addColorStop(0, "rgba(102,227,255,0.05)");
-  rightGlow.addColorStop(1, "rgba(102,227,255,0)");
-  ctx.fillStyle = rightGlow;
-  ctx.fillRect(0, 0, width, height);
-
-  drawBackgroundGrid(ctx, width, height);
-
-  const driftX = animated ? Math.sin(phase * 0.55) * 8 : 0;
-  const driftY = animated ? Math.cos(phase * 0.42) * 6 : 0;
-
-  // slightly bigger decorative smash ball
-  const size = 144;
-  const ballX = width - size - 22 + driftX;
-  const ballY = 84 + driftY;
-
-  if (smashBallImage) {
-    drawSmashBallImage(ctx, smashBallImage, ballX, ballY, size, phase);
-  } else {
-    drawFallbackSmashBall(ctx, ballX + size / 2, ballY + size / 2, 52, phase);
+  for (let x = 0; x < width; x += gap) {
+    ctx.beginPath();
+    ctx.moveTo(x, 0);
+    ctx.lineTo(x, height);
+    ctx.stroke();
   }
 
-  if (animated && particles) {
-    drawParticles(ctx, particles, phase);
+  for (let y = 0; y < height; y += gap) {
+    ctx.beginPath();
+    ctx.moveTo(0, y);
+    ctx.lineTo(width, y);
+    ctx.stroke();
   }
+
+  ctx.restore();
 }
 
 function drawSoftGlow(ctx, x, y, r, color, alpha = 1) {
@@ -331,14 +274,7 @@ function drawFallbackSmashBall(ctx, x, y, radius, phase) {
   drawSoftGlow(ctx, x, y, r * 1.8, "rgba(255,214,74,ALPHA)", 1);
   drawSoftGlow(ctx, x, y, r * 2.1, "rgba(255,255,255,ALPHA)", 0.45);
 
-  const ballGrad = ctx.createRadialGradient(
-    x - r * 0.2,
-    y - r * 0.24,
-    r * 0.1,
-    x,
-    y,
-    r
-  );
+  const ballGrad = ctx.createRadialGradient(x - r * 0.2, y - r * 0.24, r * 0.1, x, y, r);
   ballGrad.addColorStop(0, "rgba(255,255,255,0.92)");
   ballGrad.addColorStop(0.16, "rgba(255,245,180,0.96)");
   ballGrad.addColorStop(0.48, "rgba(255,217,80,0.95)");
@@ -367,14 +303,7 @@ function drawFallbackSmashBall(ctx, x, y, radius, phase) {
   ctx.moveTo(x - r * 0.05, y - r * 0.52);
   ctx.arc(x, y - r * 0.05, r * 0.57, -Math.PI * 0.92, Math.PI * 0.18, false);
   ctx.lineTo(x + r * 0.68, y + r * 0.15);
-  ctx.arc(
-    x + r * 0.08,
-    y + r * 0.08,
-    r * 0.62,
-    Math.PI * 0.08,
-    Math.PI * 1.02,
-    true
-  );
+  ctx.arc(x + r * 0.08, y + r * 0.08, r * 0.62, Math.PI * 0.08, Math.PI * 1.02, true);
   ctx.closePath();
   ctx.fill();
 
@@ -386,14 +315,7 @@ function drawSmashBallImage(ctx, image, x, y, size, phase) {
   const w = size * pulse;
   const h = size * pulse;
 
-  drawSoftGlow(
-    ctx,
-    x + w / 2,
-    y + h / 2,
-    w * 0.42,
-    "rgba(255,214,74,ALPHA)",
-    0.7
-  );
+  drawSoftGlow(ctx, x + w / 2, y + h / 2, w * 0.42, "rgba(255,214,74,ALPHA)", 0.7);
 
   ctx.save();
   ctx.globalAlpha = 0.34;
@@ -406,7 +328,7 @@ function drawBackground(ctx, width, height, options = {}) {
     phase = 0,
     animated = false,
     particles = null,
-    smashBallImage = null,
+    smashBallImage = null
   } = options;
 
   const bg = ctx.createLinearGradient(0, 0, width, height);
@@ -417,14 +339,7 @@ function drawBackground(ctx, width, height, options = {}) {
   ctx.fillStyle = bg;
   ctx.fillRect(0, 0, width, height);
 
-  const topGlow = ctx.createRadialGradient(
-    width / 2,
-    110,
-    20,
-    width / 2,
-    110,
-    240
-  );
+  const topGlow = ctx.createRadialGradient(width / 2, 110, 20, width / 2, 110, 240);
   topGlow.addColorStop(0, "rgba(255,213,74,0.08)");
   topGlow.addColorStop(0.45, "rgba(255,213,74,0.03)");
   topGlow.addColorStop(1, "rgba(255,213,74,0)");
@@ -437,14 +352,7 @@ function drawBackground(ctx, width, height, options = {}) {
   ctx.fillStyle = leftGlow;
   ctx.fillRect(0, 0, width, height);
 
-  const rightGlow = ctx.createRadialGradient(
-    width - 110,
-    180,
-    10,
-    width - 110,
-    180,
-    210
-  );
+  const rightGlow = ctx.createRadialGradient(width - 110, 180, 10, width - 110, 180, 210);
   rightGlow.addColorStop(0, "rgba(102,227,255,0.05)");
   rightGlow.addColorStop(1, "rgba(102,227,255,0)");
   ctx.fillStyle = rightGlow;
@@ -455,15 +363,14 @@ function drawBackground(ctx, width, height, options = {}) {
   const driftX = animated ? Math.sin(phase * 0.55) * 8 : 0;
   const driftY = animated ? Math.cos(phase * 0.42) * 6 : 0;
 
-  // pushed farther right/up so it stays decorative and does not compete with podium text
-  const size = 126;
+  const size = 134;
   const ballX = width - size - 26 + driftX;
   const ballY = 96 + driftY;
 
   if (smashBallImage) {
     drawSmashBallImage(ctx, smashBallImage, ballX, ballY, size, phase);
   } else {
-    drawFallbackSmashBall(ctx, ballX + size / 2, ballY + size / 2, 46, phase);
+    drawFallbackSmashBall(ctx, ballX + size / 2, ballY + size / 2, 52, phase);
   }
 
   if (animated && particles) {
@@ -471,114 +378,84 @@ function drawBackground(ctx, width, height, options = {}) {
   }
 }
 
-function drawHeaderShimmer(ctx, x, y, width, height, phase) {
-  const t = (Math.sin(phase) + 1) / 2;
-  const shimmerX = x - 120 + t * (width + 240);
+function drawHeader(ctx, width, phase, entryCount, animated = false) {
+  const title = "OFFICIAL RANKED LEADERBOARD";
+  const subtitle = `${entryCount} players`;
+
+  const glowPhase = animated ? 0.5 + (Math.sin(phase * 0.7) + 1) * 0.12 : 0.62;
 
   ctx.save();
-  drawRoundedRect(ctx, x, y, width, height, 28);
-  ctx.clip();
-
-  const grad = ctx.createLinearGradient(shimmerX - 130, 0, shimmerX + 130, 0);
-  grad.addColorStop(0, "rgba(255,255,255,0)");
-  grad.addColorStop(0.5, "rgba(255,255,255,0.055)");
-  grad.addColorStop(1, "rgba(255,255,255,0)");
-  ctx.fillStyle = grad;
-  ctx.fillRect(shimmerX - 150, y, 300, height);
-
+  ctx.fillStyle = "rgba(255,255,255,0.98)";
+  ctx.shadowColor = `rgba(255, 213, 74, ${glowPhase})`;
+  ctx.shadowBlur = 24;
+  ctx.font = "bold 44px SmashFont";
+  const titleWidth = ctx.measureText(title).width;
+  ctx.fillText(title, (width - titleWidth) / 2, 72);
   ctx.restore();
-}
 
-function drawHeader(ctx, width, phase, totalPlayers, animated = false) {
-  const x = 20;
-  const y = 18;
-  const w = width - 40;
-  const h = 92;
+  const lineY = 98;
+  const lineW = 270;
+  const leftX = (width - lineW) / 2 - 40;
+  const rightX = (width + lineW) / 2 + 40;
 
-  drawRoundedRect(ctx, x, y, w, h, 28);
-  const headerGrad = ctx.createLinearGradient(x, y, x + w, y);
-  headerGrad.addColorStop(0, "rgba(48,18,105,0.92)");
-  headerGrad.addColorStop(0.35, "rgba(44,45,142,0.92)");
-  headerGrad.addColorStop(0.7, "rgba(29,83,163,0.92)");
-  headerGrad.addColorStop(1, "rgba(27,129,159,0.92)");
-  ctx.fillStyle = headerGrad;
-  ctx.fill();
+  const gradLeft = ctx.createLinearGradient(leftX, lineY, leftX + lineW, lineY);
+  gradLeft.addColorStop(0, "rgba(255,255,255,0)");
+  gradLeft.addColorStop(1, "rgba(255,213,74,0.85)");
+  ctx.fillStyle = gradLeft;
+  ctx.fillRect(leftX, lineY, lineW, 2);
 
-  ctx.strokeStyle = "rgba(255,255,255,0.08)";
-  ctx.lineWidth = 2;
-  ctx.stroke();
+  const gradRight = ctx.createLinearGradient(rightX - lineW, lineY, rightX, lineY);
+  gradRight.addColorStop(0, "rgba(255,213,74,0.85)");
+  gradRight.addColorStop(1, "rgba(255,255,255,0)");
+  ctx.fillStyle = gradRight;
+  ctx.fillRect(rightX - lineW, lineY, lineW, 2);
 
-  if (animated) {
-    drawHeaderShimmer(ctx, x, y, w, h, phase * 0.7);
-  }
-
-  ctx.fillStyle = "#F8FBFF";
-  ctx.font = "bold 36px SmashFont";
-  ctx.fillText("SSBU LEADERBOARD", x + 24, y + 46);
-
-  ctx.fillStyle = "#D8E2FF";
+  ctx.fillStyle = "rgba(232,240,255,0.88)";
   ctx.font = "18px SmashFont";
-  ctx.fillText("Official Ranked Order", x + 24, y + 71);
-
-  const pillW = 124;
-  const pillH = 34;
-  const pillX = x + w - pillW - 18;
-  const pillY = y + 22;
-
-  drawRoundedRect(ctx, pillX, pillY, pillW, pillH, 17);
-  ctx.fillStyle = "rgba(255,255,255,0.11)";
-  ctx.fill();
-
-  ctx.fillStyle = "#FFFFFF";
-  ctx.font = "bold 17px SmashFont";
-  const txt = `${totalPlayers} Players`;
-  const tw = ctx.measureText(txt).width;
-  ctx.fillText(txt, pillX + (pillW - tw) / 2, pillY + 22);
+  const subW = ctx.measureText(subtitle).width;
+  ctx.fillText(subtitle, (width - subW) / 2, 122);
 }
 
 function drawRankBadge(ctx, x, y, place, colors) {
-  const w = 68;
-  const h = 40;
-
-  drawRoundedRect(ctx, x, y, w, h, 13);
+  const label = `#${place}`;
+  const width = place >= 10 ? 56 : 50;
+  const height = 34;
+  drawRoundedRect(ctx, x, y, width, height, 16);
   ctx.fillStyle = colors.badgeBg;
   ctx.fill();
 
   ctx.fillStyle = colors.badgeText;
-  ctx.font = "bold 20px SmashFont";
-  const text = `#${place}`;
-  const tw = ctx.measureText(text).width;
-  ctx.fillText(text, x + (w - tw) / 2, y + 27);
+  ctx.font = "bold 19px SmashFont";
+  const tw = ctx.measureText(label).width;
+  ctx.fillText(label, x + (width - tw) / 2, y + 23);
 }
 
-function drawRecordPill(ctx, x, y, w, h, label, value, accentColor) {
-  drawRoundedRect(ctx, x, y, w, h, 16);
+function drawRecordPill(ctx, x, y, width, height, label, value, accentColor) {
+  drawRoundedRect(ctx, x, y, width, height, height / 2);
   ctx.fillStyle = "rgba(255,255,255,0.08)";
   ctx.fill();
 
-  ctx.strokeStyle = "rgba(255,255,255,0.05)";
+  ctx.strokeStyle = "rgba(255,255,255,0.12)";
   ctx.lineWidth = 1;
   ctx.stroke();
 
-  ctx.fillStyle = accentColor;
-  ctx.font = "bold 13px SmashFont";
-  ctx.fillText(label, x + 12, y + 17);
+  ctx.fillStyle = "rgba(240,245,255,0.7)";
+  ctx.font = "12px SmashFont";
+  ctx.fillText(label, x + 16, y + 14);
 
-  ctx.fillStyle = "#FFFFFF";
-  ctx.font = "bold 19px SmashFont";
-  const tw = ctx.measureText(value).width;
-  ctx.fillText(value, x + w - tw - 12, y + 28);
+  ctx.fillStyle = accentColor;
+  ctx.font = "bold 18px SmashFont";
+  const valueWidth = ctx.measureText(value).width;
+  ctx.fillText(value, x + width - valueWidth - 16, y + 24);
 }
 
 function drawCardSheen(ctx, x, y, w, h, phase, strength = 1) {
-  const t = (Math.sin(phase) + 1) / 2;
-  const sweepX = x - 60 + t * (w + 120);
-
+  const sweepX = x + ((Math.sin(phase) + 1) / 2) * (w + 120) - 60;
   ctx.save();
   drawRoundedRect(ctx, x, y, w, h, 24);
   ctx.clip();
 
-  const grad = ctx.createLinearGradient(sweepX - 60, 0, sweepX + 60, 0);
+  const grad = ctx.createLinearGradient(sweepX - 60, y, sweepX + 60, y + h);
   grad.addColorStop(0, "rgba(255,255,255,0)");
   grad.addColorStop(0.5, `rgba(255,255,255,${0.035 * strength})`);
   grad.addColorStop(1, "rgba(255,255,255,0)");
@@ -588,20 +465,9 @@ function drawCardSheen(ctx, x, y, w, h, phase, strength = 1) {
   ctx.restore();
 }
 
-function drawAvatarRing(
-  ctx,
-  cx,
-  cy,
-  r,
-  colors,
-  phase,
-  champion = false,
-  animated = false
-) {
+function drawAvatarRing(ctx, cx, cy, r, colors, phase, champion = false, animated = false) {
   const pulse = animated
-    ? champion
-      ? 1 + Math.sin(phase * 0.7) * 0.008
-      : 1 + Math.sin(phase * 0.7) * 0.004
+    ? (champion ? 1 + Math.sin(phase * 0.7) * 0.008 : 1 + Math.sin(phase * 0.7) * 0.004)
     : 1;
 
   const ringR = r + (champion ? 7 : 4) * pulse;
@@ -633,9 +499,7 @@ function drawTopPlayerCard(ctx, entry, x, y, w, h, phase, options = {}) {
   const avatarSize = isChampion ? 112 : 82;
   const avatarRadius = avatarSize / 2;
   const bob = animated
-    ? isChampion
-      ? Math.sin(phase * 0.7) * 1.1
-      : Math.sin((phase + entry.place * 0.4) * 0.7) * 0.6
+    ? (isChampion ? Math.sin(phase * 0.7) * 1.1 : Math.sin((phase + entry.place * 0.4) * 0.7) * 0.6)
     : 0;
   const shadowBlur = isChampion ? 8 : 5;
 
@@ -645,7 +509,7 @@ function drawTopPlayerCard(ctx, entry, x, y, w, h, phase, options = {}) {
   drawRoundedRect(ctx, x, y, w, h, 26);
   ctx.fillStyle = createVerticalGradient(ctx, x, y, h, [
     [0, colors.panelTop],
-    [1, colors.panelBottom],
+    [1, colors.panelBottom]
   ]);
   ctx.fill();
   ctx.restore();
@@ -653,7 +517,7 @@ function drawTopPlayerCard(ctx, entry, x, y, w, h, phase, options = {}) {
   drawRoundedRect(ctx, x, y, w, h, 26);
   ctx.fillStyle = createVerticalGradient(ctx, x, y, h, [
     [0, colors.panelTop],
-    [1, colors.panelBottom],
+    [1, colors.panelBottom]
   ]);
   ctx.fill();
 
@@ -662,15 +526,7 @@ function drawTopPlayerCard(ctx, entry, x, y, w, h, phase, options = {}) {
   ctx.stroke();
 
   if (animated) {
-    drawCardSheen(
-      ctx,
-      x,
-      y,
-      w,
-      h,
-      phase * 0.65 + entry.place * 0.3,
-      isChampion ? 1 : 0.55
-    );
+    drawCardSheen(ctx, x, y, w, h, phase * 0.65 + entry.place * 0.3, isChampion ? 1 : 0.55);
   }
 
   drawRoundedRect(ctx, x, y, 8, h, 4);
@@ -693,22 +549,12 @@ function drawTopPlayerCard(ctx, entry, x, y, w, h, phase, options = {}) {
     ctx.fillText(txt, champX + (106 - tw) / 2, champY + 19);
   }
 
-  // raise avatar slightly and push text lower so they never clash
   const avatarX = x + (w - avatarSize) / 2;
   const avatarY = y + 54 + bob;
   const avatarCX = avatarX + avatarRadius;
   const avatarCY = avatarY + avatarRadius;
 
-  drawAvatarRing(
-    ctx,
-    avatarCX,
-    avatarCY,
-    avatarRadius,
-    colors,
-    phase,
-    isChampion,
-    animated
-  );
+  drawAvatarRing(ctx, avatarCX, avatarCY, avatarRadius, colors, phase, isChampion, animated);
 
   if (entry.avatarImage) {
     drawCircleImage(ctx, entry.avatarImage, avatarX, avatarY, avatarSize);
@@ -742,16 +588,7 @@ function drawTopPlayerCard(ctx, entry, x, y, w, h, phase, options = {}) {
   const pillH = 36;
   const pillX = x + (w - pillW) / 2;
   const pillY = y + h - 42;
-  drawRecordPill(
-    ctx,
-    pillX,
-    pillY,
-    pillW,
-    pillH,
-    "SET RECORD",
-    `${entry.setWins}-${entry.setLosses}`,
-    colors.accentSoft
-  );
+  drawRecordPill(ctx, pillX, pillY, pillW, pillH, "SET RECORD", `${entry.setWins}-${entry.setLosses}`, colors.accentSoft);
 }
 
 function drawLowerCard(ctx, entry, x, y, w, h, phase, animated = false) {
@@ -768,7 +605,7 @@ function drawLowerCard(ctx, entry, x, y, w, h, phase, animated = false) {
   drawRoundedRect(ctx, x, y, w, h, 20);
   ctx.fillStyle = createVerticalGradient(ctx, x, y, h, [
     [0, colors.panelTop],
-    [1, colors.panelBottom],
+    [1, colors.panelBottom]
   ]);
   ctx.fill();
   ctx.restore();
@@ -776,7 +613,7 @@ function drawLowerCard(ctx, entry, x, y, w, h, phase, animated = false) {
   drawRoundedRect(ctx, x, y, w, h, 20);
   ctx.fillStyle = createVerticalGradient(ctx, x, y, h, [
     [0, colors.panelTop],
-    [1, colors.panelBottom],
+    [1, colors.panelBottom]
   ]);
   ctx.fill();
 
@@ -794,16 +631,7 @@ function drawLowerCard(ctx, entry, x, y, w, h, phase, animated = false) {
 
   drawRankBadge(ctx, x + 16, y + 15, entry.place, colors);
 
-  drawAvatarRing(
-    ctx,
-    avatarCX,
-    avatarCY,
-    avatarSize / 2,
-    colors,
-    phase + entry.place * 0.2,
-    false,
-    animated
-  );
+  drawAvatarRing(ctx, avatarCX, avatarCY, avatarSize / 2, colors, phase + entry.place * 0.2, false, animated);
 
   if (entry.avatarImage) {
     drawCircleImage(ctx, entry.avatarImage, avatarX, avatarY, avatarSize);
@@ -834,16 +662,7 @@ function drawLowerCard(ctx, entry, x, y, w, h, phase, animated = false) {
   const recordH = 36;
   const recordX = x + w - recordW - 16;
   const recordY = y + 17;
-  drawRecordPill(
-    ctx,
-    recordX,
-    recordY,
-    recordW,
-    recordH,
-    "SET RECORD",
-    `${entry.setWins}-${entry.setLosses}`,
-    colors.accentSoft
-  );
+  drawRecordPill(ctx, recordX, recordY, recordW, recordH, "SET RECORD", `${entry.setWins}-${entry.setLosses}`, colors.accentSoft);
 }
 
 function drawTopSection(ctx, entries, width, phase, animated = false) {
@@ -867,21 +686,21 @@ function drawTopSection(ctx, entries, width, phase, animated = false) {
   if (second) {
     drawTopPlayerCard(ctx, second, leftX, sideY, sideW, sideH, phase, {
       isChampion: false,
-      animated,
+      animated
     });
   }
 
   if (first) {
     drawTopPlayerCard(ctx, first, centerX, topY, centerW, centerH, phase, {
       isChampion: true,
-      animated,
+      animated
     });
   }
 
   if (third) {
     drawTopPlayerCard(ctx, third, rightX, sideY, sideW, sideH, phase, {
       isChampion: false,
-      animated,
+      animated
     });
   }
 }
@@ -907,14 +726,14 @@ function drawLeaderboardFrame(ctx, entries, width, height, options = {}) {
     phase = 0,
     animated = false,
     particles = null,
-    smashBallImage = null,
+    smashBallImage = null
   } = options;
 
   drawBackground(ctx, width, height, {
     phase,
     animated,
     particles,
-    smashBallImage,
+    smashBallImage
   });
 
   drawHeader(ctx, width, phase, entries.length, animated);
@@ -930,7 +749,7 @@ function getLeaderboardHeight(entryCount) {
 async function generateLeaderboardImage(rows, guild) {
   const [entries, smashBallImage] = await Promise.all([
     buildLeaderboardEntries(guild, rows),
-    getSmashBallImage(),
+    getSmashBallImage()
   ]);
 
   const width = 980;
@@ -942,7 +761,7 @@ async function generateLeaderboardImage(rows, guild) {
   drawLeaderboardFrame(ctx, entries, width, height, {
     animated: false,
     phase: 0,
-    smashBallImage,
+    smashBallImage
   });
 
   return canvas.toBuffer("image/png");
@@ -951,7 +770,7 @@ async function generateLeaderboardImage(rows, guild) {
 async function generateAnimatedLeaderboardGif(rows, guild) {
   const [entries, smashBallImage] = await Promise.all([
     buildLeaderboardEntries(guild, rows),
-    getSmashBallImage(),
+    getSmashBallImage()
   ]);
 
   const width = 900;
@@ -976,7 +795,7 @@ async function generateAnimatedLeaderboardGif(rows, guild) {
       animated: true,
       phase,
       particles,
-      smashBallImage,
+      smashBallImage
     });
     encoder.addFrame(ctx);
   }
@@ -987,5 +806,5 @@ async function generateAnimatedLeaderboardGif(rows, guild) {
 
 module.exports = {
   generateLeaderboardImage,
-  generateAnimatedLeaderboardGif,
+  generateAnimatedLeaderboardGif
 };
