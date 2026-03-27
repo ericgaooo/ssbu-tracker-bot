@@ -248,7 +248,7 @@ client.on("interactionCreate", async (interaction) => {
       }
 
       const lines = await Promise.all(
-        rows.slice(0, 10).map(async (row, index) => {
+        rows.map(async (row, index) => {
           const displayName = await getDisplayNameFromGuild(
             interaction.guild,
             row.user_id,
