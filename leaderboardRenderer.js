@@ -1,3 +1,5 @@
+const fs = require("fs");
+const path = require("path");
 const { createCanvas, loadImage, registerFont } = require("canvas");
 const GIFEncoder = require("gif-encoder-2");
 
@@ -10,6 +12,17 @@ registerFont("./assets/fonts/Nunito-Regular.ttf", {
   family: "SmashFont",
   weight: "normal"
 });
+
+const SMASH_BALL_PATH = path.join(__dirname, "assets", "images", "smash-ball.png");
+let smashBallImagePromise = null;
+
+function getSmashBallImage() {
+  if (!fs.existsSync(SMASH_BALL_PATH)) return null;
+  if (!smashBallImagePromise) {
+    smashBallImagePromise = loadImage(SMASH_BALL_PATH).catch(() => null);
+  }
+  return smashBallImagePromise;
+}
 
 async function getDisplayNameFromGuild(guild, userId, fallback = "Unknown Player") {
   try {
@@ -177,24 +190,24 @@ function getPlacementColors(place) {
 
 function createParticles(width, height, count) {
   const colors = [
-    "rgba(255,213,74,0.34)",
-    "rgba(255,255,255,0.28)",
-    "rgba(102,227,255,0.28)",
-    "rgba(255,102,194,0.20)"
+    "rgba(255,213,74,0.26)",
+    "rgba(255,255,255,0.22)",
+    "rgba(102,227,255,0.20)",
+    "rgba(255,102,194,0.16)"
   ];
 
   return Array.from({ length: count }, () => ({
     x: Math.random() * width,
     y: Math.random() * height,
-    len: 5 + Math.random() * 8,
-    thickness: 1 + Math.random() * 0.8,
+    len: 5 + Math.random() * 7,
+    thickness: 1 + Math.random() * 0.6,
     angle: Math.random() * Math.PI * 2,
     color: colors[Math.floor(Math.random() * colors.length)],
-    alpha: 0.05 + Math.random() * 0.09,
-    ampX: 2 + Math.random() * 6,
-    ampY: 2 + Math.random() * 8,
+    alpha: 0.04 + Math.random() * 0.06,
+    ampX: 1.5 + Math.random() * 4,
+    ampY: 1.5 + Math.random() * 5,
     phase: Math.random() * Math.PI * 2,
-    speed: 0.22 + Math.random() * 0.18
+    speed: 0.18 + Math.random() * 0.14
   }));
 }
 
@@ -220,7 +233,7 @@ function drawParticles(ctx, particles, phase) {
 
 function drawBackgroundGrid(ctx, width, height) {
   ctx.save();
-  ctx.globalAlpha = 0.028;
+  ctx.globalAlpha = 0.026;
   ctx.strokeStyle = "#B4C7FF";
   ctx.lineWidth = 1;
 
@@ -245,8 +258,8 @@ function drawBackgroundGrid(ctx, width, height) {
 
 function drawSoftGlow(ctx, x, y, r, color, alpha = 1) {
   const grad = ctx.createRadialGradient(x, y, 0, x, y, r);
-  grad.addColorStop(0, color.replace("ALPHA", `${0.22 * alpha}`));
-  grad.addColorStop(0.45, color.replace("ALPHA", `${0.10 * alpha}`));
+  grad.addColorStop(0, color.replace("ALPHA", `${0.18 * alpha}`));
+  grad.addColorStop(0.5, color.replace("ALPHA", `${0.07 * alpha}`));
   grad.addColorStop(1, color.replace("ALPHA", "0"));
   ctx.fillStyle = grad;
   ctx.beginPath();
@@ -254,12 +267,12 @@ function drawSoftGlow(ctx, x, y, r, color, alpha = 1) {
   ctx.fill();
 }
 
-function drawFloatingSmashBall(ctx, x, y, radius, phase) {
-  const pulse = 1 + Math.sin(phase) * 0.015;
+function drawFallbackSmashBall(ctx, x, y, radius, phase) {
+  const pulse = 1 + Math.sin(phase) * 0.012;
   const r = radius * pulse;
 
   drawSoftGlow(ctx, x, y, r * 1.8, "rgba(255,214,74,ALPHA)", 1);
-  drawSoftGlow(ctx, x, y, r * 2.2, "rgba(255,255,255,ALPHA)", 0.55);
+  drawSoftGlow(ctx, x, y, r * 2.1, "rgba(255,255,255,ALPHA)", 0.45);
 
   const ballGrad = ctx.createRadialGradient(x - r * 0.2, y - r * 0.24, r * 0.1, x, y, r);
   ballGrad.addColorStop(0, "rgba(255,255,255,0.92)");
@@ -280,11 +293,6 @@ function drawFloatingSmashBall(ctx, x, y, radius, phase) {
   ctx.stroke();
 
   ctx.beginPath();
-  ctx.arc(x - r * 0.22, y - r * 0.24, r * 0.24, 0, Math.PI * 2);
-  ctx.fillStyle = "rgba(255,255,255,0.18)";
-  ctx.fill();
-
-  ctx.beginPath();
   ctx.arc(x, y, r * 0.985, 0, Math.PI * 2);
   ctx.clip();
 
@@ -302,11 +310,25 @@ function drawFloatingSmashBall(ctx, x, y, radius, phase) {
   ctx.restore();
 }
 
+function drawSmashBallImage(ctx, image, x, y, size, phase) {
+  const pulse = 1 + Math.sin(phase) * 0.01;
+  const w = size * pulse;
+  const h = size * pulse;
+
+  drawSoftGlow(ctx, x + w / 2, y + h / 2, w * 0.42, "rgba(255,214,74,ALPHA)", 0.7);
+
+  ctx.save();
+  ctx.globalAlpha = 0.34;
+  ctx.drawImage(image, x, y, w, h);
+  ctx.restore();
+}
+
 function drawBackground(ctx, width, height, options = {}) {
   const {
     phase = 0,
     animated = false,
-    particles = null
+    particles = null,
+    smashBallImage = null
   } = options;
 
   const bg = ctx.createLinearGradient(0, 0, width, height);
@@ -338,12 +360,19 @@ function drawBackground(ctx, width, height, options = {}) {
 
   drawBackgroundGrid(ctx, width, height);
 
-  const driftX = animated ? Math.sin(phase * 0.6) * 10 : 0;
-  const driftY = animated ? Math.cos(phase * 0.45) * 8 : 0;
-  const ballX = width * 0.79 + driftX;
-  const ballY = 150 + driftY;
+  const driftX = animated ? Math.sin(phase * 0.55) * 8 : 0;
+  const driftY = animated ? Math.cos(phase * 0.42) * 6 : 0;
 
-  drawFloatingSmashBall(ctx, ballX, ballY, 54, phase);
+  // pushed farther right/up so it stays decorative and does not compete with podium text
+  const size = 126;
+  const ballX = width - size - 26 + driftX;
+  const ballY = 96 + driftY;
+
+  if (smashBallImage) {
+    drawSmashBallImage(ctx, smashBallImage, ballX, ballY, size, phase);
+  } else {
+    drawFallbackSmashBall(ctx, ballX + size / 2, ballY + size / 2, 46, phase);
+  }
 
   if (animated && particles) {
     drawParticles(ctx, particles, phase);
@@ -360,7 +389,7 @@ function drawHeaderShimmer(ctx, x, y, width, height, phase) {
 
   const grad = ctx.createLinearGradient(shimmerX - 130, 0, shimmerX + 130, 0);
   grad.addColorStop(0, "rgba(255,255,255,0)");
-  grad.addColorStop(0.5, "rgba(255,255,255,0.06)");
+  grad.addColorStop(0.5, "rgba(255,255,255,0.055)");
   grad.addColorStop(1, "rgba(255,255,255,0)");
   ctx.fillStyle = grad;
   ctx.fillRect(shimmerX - 150, y, 300, height);
@@ -459,7 +488,7 @@ function drawCardSheen(ctx, x, y, w, h, phase, strength = 1) {
 
   const grad = ctx.createLinearGradient(sweepX - 60, 0, sweepX + 60, 0);
   grad.addColorStop(0, "rgba(255,255,255,0)");
-  grad.addColorStop(0.5, `rgba(255,255,255,${0.04 * strength})`);
+  grad.addColorStop(0.5, `rgba(255,255,255,${0.035 * strength})`);
   grad.addColorStop(1, "rgba(255,255,255,0)");
 
   ctx.fillStyle = grad;
@@ -498,9 +527,11 @@ function drawAvatarRing(ctx, cx, cy, r, colors, phase, champion = false, animate
 function drawTopPlayerCard(ctx, entry, x, y, w, h, phase, options = {}) {
   const { isChampion = false, animated = false } = options;
   const colors = getPlacementColors(entry.place);
-  const avatarSize = isChampion ? 118 : 86;
+  const avatarSize = isChampion ? 112 : 82;
   const avatarRadius = avatarSize / 2;
-  const bob = animated ? (isChampion ? Math.sin(phase * 0.7) * 1.4 : Math.sin((phase + entry.place * 0.4) * 0.7) * 0.8) : 0;
+  const bob = animated
+    ? (isChampion ? Math.sin(phase * 0.7) * 1.1 : Math.sin((phase + entry.place * 0.4) * 0.7) * 0.6)
+    : 0;
   const shadowBlur = isChampion ? 8 : 5;
 
   ctx.save();
@@ -526,7 +557,7 @@ function drawTopPlayerCard(ctx, entry, x, y, w, h, phase, options = {}) {
   ctx.stroke();
 
   if (animated) {
-    drawCardSheen(ctx, x, y, w, h, phase * 0.65 + entry.place * 0.3, isChampion ? 1 : 0.6);
+    drawCardSheen(ctx, x, y, w, h, phase * 0.65 + entry.place * 0.3, isChampion ? 1 : 0.55);
   }
 
   drawRoundedRect(ctx, x, y, 8, h, 4);
@@ -549,8 +580,9 @@ function drawTopPlayerCard(ctx, entry, x, y, w, h, phase, options = {}) {
     ctx.fillText(txt, champX + (106 - tw) / 2, champY + 19);
   }
 
+  // raise avatar slightly and push text lower so they never clash
   const avatarX = x + (w - avatarSize) / 2;
-  const avatarY = y + 62 + bob;
+  const avatarY = y + 54 + bob;
   const avatarCX = avatarX + avatarRadius;
   const avatarCY = avatarY + avatarRadius;
 
@@ -565,28 +597,29 @@ function drawTopPlayerCard(ctx, entry, x, y, w, h, phase, options = {}) {
     ctx.fill();
 
     ctx.fillStyle = "#F6FAFF";
-    ctx.font = `bold ${isChampion ? 38 : 28}px SmashFont`;
+    ctx.font = `bold ${isChampion ? 36 : 27}px SmashFont`;
     const initial = entry.canvasDisplayName.slice(0, 1).toUpperCase();
     const tw = ctx.measureText(initial).width;
-    ctx.fillText(initial, avatarCX - tw / 2, avatarCY + 13);
+    ctx.fillText(initial, avatarCX - tw / 2, avatarCY + 12);
   }
 
   ctx.fillStyle = colors.text;
-  ctx.font = isChampion ? "bold 28px SmashFont" : "bold 23px SmashFont";
-  const name = truncateText(ctx, entry.canvasDisplayName, w - 36);
+  ctx.font = isChampion ? "bold 26px SmashFont" : "bold 22px SmashFont";
+  const nameMaxWidth = w - 34;
+  const name = truncateText(ctx, entry.canvasDisplayName, nameMaxWidth);
   const nameW = ctx.measureText(name).width;
-  ctx.fillText(name, x + (w - nameW) / 2, y + h - 86);
+  ctx.fillText(name, x + (w - nameW) / 2, y + h - 76);
 
   ctx.fillStyle = colors.subtext;
-  ctx.font = "20px SmashFont";
+  ctx.font = "19px SmashFont";
   const rankText = `Rank #${entry.rank}`;
   const rankW = ctx.measureText(rankText).width;
-  ctx.fillText(rankText, x + (w - rankW) / 2, y + h - 54);
+  ctx.fillText(rankText, x + (w - rankW) / 2, y + h - 49);
 
-  const pillW = isChampion ? 176 : 158;
-  const pillH = 38;
+  const pillW = isChampion ? 170 : 154;
+  const pillH = 36;
   const pillX = x + (w - pillW) / 2;
-  const pillY = y + h - 34;
+  const pillY = y + h - 30;
   drawRecordPill(ctx, pillX, pillY, pillW, pillH, "SET RECORD", `${entry.setWins}-${entry.setLosses}`, colors.accentSoft);
 }
 
@@ -621,7 +654,7 @@ function drawLowerCard(ctx, entry, x, y, w, h, phase, animated = false) {
   ctx.stroke();
 
   if (animated) {
-    drawCardSheen(ctx, x, y, w, h, phase * 0.65 + entry.place * 0.18, 0.35);
+    drawCardSheen(ctx, x, y, w, h, phase * 0.65 + entry.place * 0.18, 0.3);
   }
 
   drawRoundedRect(ctx, x, y, 7, h, 4);
@@ -724,13 +757,15 @@ function drawLeaderboardFrame(ctx, entries, width, height, options = {}) {
   const {
     phase = 0,
     animated = false,
-    particles = null
+    particles = null,
+    smashBallImage = null
   } = options;
 
   drawBackground(ctx, width, height, {
     phase,
     animated,
-    particles
+    particles,
+    smashBallImage
   });
 
   drawHeader(ctx, width, phase, entries.length, animated);
@@ -744,7 +779,11 @@ function getLeaderboardHeight(entryCount) {
 }
 
 async function generateLeaderboardImage(rows, guild) {
-  const entries = await buildLeaderboardEntries(guild, rows);
+  const [entries, smashBallImage] = await Promise.all([
+    buildLeaderboardEntries(guild, rows),
+    getSmashBallImage()
+  ]);
+
   const width = 980;
   const height = getLeaderboardHeight(entries.length);
 
@@ -753,14 +792,19 @@ async function generateLeaderboardImage(rows, guild) {
 
   drawLeaderboardFrame(ctx, entries, width, height, {
     animated: false,
-    phase: 0
+    phase: 0,
+    smashBallImage
   });
 
   return canvas.toBuffer("image/png");
 }
 
 async function generateAnimatedLeaderboardGif(rows, guild) {
-  const entries = await buildLeaderboardEntries(guild, rows);
+  const [entries, smashBallImage] = await Promise.all([
+    buildLeaderboardEntries(guild, rows),
+    getSmashBallImage()
+  ]);
+
   const width = 900;
   const height = getLeaderboardHeight(entries.length);
 
@@ -782,7 +826,8 @@ async function generateAnimatedLeaderboardGif(rows, guild) {
     drawLeaderboardFrame(ctx, entries, width, height, {
       animated: true,
       phase,
-      particles
+      particles,
+      smashBallImage
     });
     encoder.addFrame(ctx);
   }
