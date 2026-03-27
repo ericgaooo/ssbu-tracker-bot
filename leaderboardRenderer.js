@@ -33,6 +33,37 @@ async function getAvatarUrlFromGuild(guild, userId) {
   }
 }
 
+async function buildLeaderboardEntries(guild, rows) {
+  return Promise.all(
+    rows.map(async (row, index) => {
+      const displayName = await getDisplayNameFromGuild(
+        guild,
+        row.user_id,
+        row.username || "Unknown Player"
+      );
+
+      const avatarUrl = await getAvatarUrlFromGuild(guild, row.user_id);
+
+      let avatarImage = null;
+      if (avatarUrl) {
+        try {
+          avatarImage = await loadImage(avatarUrl);
+        } catch {
+          avatarImage = null;
+        }
+      }
+
+      return {
+        ...row,
+        place: index + 1,
+        displayName,
+        canvasDisplayName: sanitizeDisplayNameForCanvas(displayName),
+        avatarImage
+      };
+    })
+  );
+}
+
 function drawRoundedRect(ctx, x, y, width, height, radius) {
   ctx.beginPath();
   ctx.moveTo(x + radius, y);
@@ -570,7 +601,16 @@ function drawLowerSection(ctx, entries, width, phase) {
   }
 }
 
-function drawLeaderboardFrame(ctx, entries, width, height, particles = null, orbs = null, sparkles = null, phase = 0) {
+function drawLeaderboardFrame(
+  ctx,
+  entries,
+  width,
+  height,
+  particles = null,
+  orbs = null,
+  sparkles = null,
+  phase = 0
+) {
   drawBackground(ctx, width, height, particles, orbs, sparkles, phase);
   drawHeader(ctx, width, phase);
   drawTopSection(ctx, entries, width, phase);
