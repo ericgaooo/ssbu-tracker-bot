@@ -33,6 +33,15 @@ async function getAvatarUrlFromGuild(guild, userId) {
   }
 }
 
+function sanitizeDisplayNameForCanvas(name) {
+  if (!name) return name;
+  const stripped = name
+    .replace(/[\p{Extended_Pictographic}\p{Emoji_Presentation}\uFE0F\u200D]/gu, "")
+    .replace(/\s+/g, " ")
+    .trim();
+  return stripped || name;
+}
+
 async function buildLeaderboardEntries(guild, rows) {
   return Promise.all(
     rows.map(async (row, index) => {
@@ -65,16 +74,17 @@ async function buildLeaderboardEntries(guild, rows) {
 }
 
 function drawRoundedRect(ctx, x, y, width, height, radius) {
+  const r = Math.min(radius, width / 2, height / 2);
   ctx.beginPath();
-  ctx.moveTo(x + radius, y);
-  ctx.lineTo(x + width - radius, y);
-  ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
-  ctx.lineTo(x + width, y + height - radius);
-  ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
-  ctx.lineTo(x + radius, y + height);
-  ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
-  ctx.lineTo(x, y + radius);
-  ctx.quadraticCurveTo(x, y, x + radius, y);
+  ctx.moveTo(x + r, y);
+  ctx.lineTo(x + width - r, y);
+  ctx.quadraticCurveTo(x + width, y, x + width, y + r);
+  ctx.lineTo(x + width, y + height - r);
+  ctx.quadraticCurveTo(x + width, y + height, x + width - r, y + height);
+  ctx.lineTo(x + r, y + height);
+  ctx.quadraticCurveTo(x, y + height, x, y + height - r);
+  ctx.lineTo(x, y + r);
+  ctx.quadraticCurveTo(x, y, x + r, y);
   ctx.closePath();
 }
 
@@ -97,94 +107,114 @@ function truncateText(ctx, text, maxWidth) {
   return `${output}…`;
 }
 
-function sanitizeDisplayNameForCanvas(name) {
-  if (!name) return name;
-  const stripped = name
-    .replace(/[\p{Extended_Pictographic}\p{Emoji_Presentation}\uFE0F\u200D]/gu, "")
-    .replace(/\s+/g, " ")
-    .trim();
-  return stripped || name;
+function createVerticalGradient(ctx, x, y, h, stops) {
+  const grad = ctx.createLinearGradient(x, y, x, y + h);
+  for (const [stop, color] of stops) {
+    grad.addColorStop(stop, color);
+  }
+  return grad;
 }
 
 function getPlacementColors(place) {
   if (place === 1) {
     return {
-      bg: "#161006",
-      accent: "#FFD84D",
-      text: "#FFF7D6",
-      glow: "rgba(255,216,77,0.65)",
-      badgeBg: "#FFE27D",
-      badgeText: "#2A1800",
-      panelEdge: "rgba(255,216,77,0.65)"
+      panelTop: "#2A1A04",
+      panelBottom: "#120B02",
+      accent: "#FFD54A",
+      accentSoft: "#FFF0A6",
+      text: "#FFF8DB",
+      subtext: "#F0E4B5",
+      glow: "rgba(255, 213, 74, 0.55)",
+      badgeBg: "#FFE27A",
+      badgeText: "#2F1A00",
+      trim: "rgba(255, 225, 140, 0.65)"
     };
   }
+
   if (place === 2) {
     return {
-      bg: "#0E1839",
-      accent: "#E4ECFF",
-      text: "#F3F7FF",
-      glow: "rgba(228,236,255,0.32)",
-      badgeBg: "#EEF3FF",
-      badgeText: "#1A2745",
-      panelEdge: "rgba(228,236,255,0.35)"
+      panelTop: "#16203E",
+      panelBottom: "#0A1127",
+      accent: "#DDE6FF",
+      accentSoft: "#FFFFFF",
+      text: "#F6F8FF",
+      subtext: "#DDE5FF",
+      glow: "rgba(221, 230, 255, 0.32)",
+      badgeBg: "#EEF2FF",
+      badgeText: "#1B2547",
+      trim: "rgba(221, 230, 255, 0.36)"
     };
   }
+
   if (place === 3) {
     return {
-      bg: "#34150E",
-      accent: "#FFBE94",
-      text: "#FFEADF",
-      glow: "rgba(255,190,148,0.38)",
-      badgeBg: "#FFD7BF",
-      badgeText: "#472012",
-      panelEdge: "rgba(255,190,148,0.35)"
+      panelTop: "#3B1D12",
+      panelBottom: "#1B0C06",
+      accent: "#FFB78A",
+      accentSoft: "#FFE0CC",
+      text: "#FFF0E7",
+      subtext: "#FFD7C1",
+      glow: "rgba(255, 183, 138, 0.34)",
+      badgeBg: "#FFD7BD",
+      badgeText: "#4A2413",
+      trim: "rgba(255, 183, 138, 0.34)"
     };
   }
 
   return {
-    bg: "#111733",
-    accent: "#7FA3FF",
-    text: "#F1F5FF",
-    glow: "rgba(127,163,255,0.20)",
-    badgeBg: "#26305F",
-    badgeText: "#F1F5FF",
-    panelEdge: "rgba(127,163,255,0.25)"
+    panelTop: "#111C3F",
+    panelBottom: "#0A1127",
+    accent: "#77A7FF",
+    accentSoft: "#DCE8FF",
+    text: "#F5F8FF",
+    subtext: "#D7E3FF",
+    glow: "rgba(119, 167, 255, 0.22)",
+    badgeBg: "#213264",
+    badgeText: "#F5F8FF",
+    trim: "rgba(119, 167, 255, 0.22)"
   };
 }
 
 function createParticles(width, height, count) {
-  const colors = ["#FFD84D", "#FFFFFF", "#63E3FF", "#FF4FB8", "#8F7BFF"];
-  return Array.from({ length: count }, () => ({
-    x: Math.random() * width,
-    y: Math.random() * height,
-    len: 7 + Math.random() * 14,
-    thickness: 1.4 + Math.random() * 2.2,
-    angle: Math.random() * Math.PI,
-    color: colors[Math.floor(Math.random() * colors.length)],
-    alpha: 0.35 + Math.random() * 0.45,
-    ampX: 10 + Math.random() * 28,
-    ampY: 14 + Math.random() * 42,
-    phase: Math.random() * Math.PI * 2,
-    speed: 0.7 + Math.random() * 1.3
-  }));
-}
-
-function createEnergyOrbs(width, height, count) {
   const colors = [
-    "rgba(255,216,77,0.16)",
-    "rgba(255,79,184,0.10)",
-    "rgba(99,227,255,0.10)",
-    "rgba(143,123,255,0.12)"
+    "rgba(255,213,74,0.85)",
+    "rgba(255,255,255,0.90)",
+    "rgba(102,227,255,0.80)",
+    "rgba(255,102,194,0.70)",
+    "rgba(144,122,255,0.76)"
   ];
 
   return Array.from({ length: count }, () => ({
     x: Math.random() * width,
     y: Math.random() * height,
-    r: 24 + Math.random() * 52,
+    len: 8 + Math.random() * 18,
+    thickness: 1 + Math.random() * 2.2,
+    angle: Math.random() * Math.PI * 2,
+    color: colors[Math.floor(Math.random() * colors.length)],
+    alpha: 0.18 + Math.random() * 0.32,
+    ampX: 8 + Math.random() * 26,
+    ampY: 12 + Math.random() * 36,
     phase: Math.random() * Math.PI * 2,
-    speed: 0.55 + Math.random() * 1.1,
-    driftX: 8 + Math.random() * 24,
-    driftY: 10 + Math.random() * 28,
+    speed: 0.7 + Math.random() * 1.1
+  }));
+}
+
+function createEnergyOrbs(width, height, count) {
+  const colors = [
+    "rgba(255,213,74,0.12)",
+    "rgba(255,95,189,0.09)",
+    "rgba(102,227,255,0.09)",
+    "rgba(147,125,255,0.10)"
+  ];
+
+  return Array.from({ length: count }, () => ({
+    x: Math.random() * width,
+    y: Math.random() * height,
+    r: 36 + Math.random() * 72,
+    phase: Math.random() * Math.PI * 2,
+    speed: 0.35 + Math.random() * 0.7,
+    driftX: 8 + Math.random() * 26,
+    driftY: 10 + Math.random() * 32,
     color: colors[Math.floor(Math.random() * colors.length)]
   }));
 }
@@ -193,9 +223,9 @@ function createSparkles(width, height, count) {
   return Array.from({ length: count }, () => ({
     x: Math.random() * width,
     y: Math.random() * height,
-    size: 4 + Math.random() * 8,
+    size: 3 + Math.random() * 7,
     phase: Math.random() * Math.PI * 2,
-    speed: 0.6 + Math.random() * 1.2
+    speed: 0.5 + Math.random() * 1.1
   }));
 }
 
@@ -235,7 +265,7 @@ function drawSparkle(ctx, x, y, size, alpha) {
   ctx.save();
   ctx.globalAlpha = alpha;
   ctx.strokeStyle = "#FFFFFF";
-  ctx.lineWidth = 2;
+  ctx.lineWidth = 1.8;
   ctx.lineCap = "round";
 
   ctx.beginPath();
@@ -245,12 +275,12 @@ function drawSparkle(ctx, x, y, size, alpha) {
   ctx.lineTo(x, y + size);
   ctx.stroke();
 
-  ctx.lineWidth = 1.2;
+  ctx.lineWidth = 1;
   ctx.beginPath();
-  ctx.moveTo(x - size * 0.65, y - size * 0.65);
-  ctx.lineTo(x + size * 0.65, y + size * 0.65);
-  ctx.moveTo(x + size * 0.65, y - size * 0.65);
-  ctx.lineTo(x - size * 0.65, y + size * 0.65);
+  ctx.moveTo(x - size * 0.62, y - size * 0.62);
+  ctx.lineTo(x + size * 0.62, y + size * 0.62);
+  ctx.moveTo(x + size * 0.62, y - size * 0.62);
+  ctx.lineTo(x - size * 0.62, y + size * 0.62);
   ctx.stroke();
 
   ctx.restore();
@@ -258,131 +288,206 @@ function drawSparkle(ctx, x, y, size, alpha) {
 
 function drawSparkles(ctx, sparkles, phase) {
   for (const s of sparkles) {
-    const alpha = 0.10 + (Math.sin(phase * s.speed + s.phase) + 1) * 0.18;
+    const alpha = 0.08 + (Math.sin(phase * s.speed + s.phase) + 1) * 0.16;
     drawSparkle(ctx, s.x, s.y, s.size, alpha);
   }
 }
 
-function drawSmashBallBurst(ctx, centerX, centerY, phase) {
-  const pulse = 1 + Math.sin(phase) * 0.04;
+function drawSweep(ctx, width, height, phase) {
+  const t = (Math.sin(phase) + 1) / 2;
+  const sweepX = -320 + t * (width + 640);
 
-  const halo = ctx.createRadialGradient(centerX, centerY, 16, centerX, centerY, 280 * pulse);
-  halo.addColorStop(0, "rgba(255,255,255,0.25)");
-  halo.addColorStop(0.16, "rgba(255,220,102,0.24)");
-  halo.addColorStop(0.4, "rgba(255,220,102,0.11)");
-  halo.addColorStop(0.72, "rgba(255,79,184,0.05)");
+  const grad = ctx.createLinearGradient(sweepX - 180, 0, sweepX + 180, 0);
+  grad.addColorStop(0, "rgba(255,255,255,0)");
+  grad.addColorStop(0.35, "rgba(255,255,255,0.02)");
+  grad.addColorStop(0.5, "rgba(255,255,255,0.08)");
+  grad.addColorStop(0.65, "rgba(255,255,255,0.02)");
+  grad.addColorStop(1, "rgba(255,255,255,0)");
+
+  ctx.save();
+  ctx.translate(width / 2, height / 2);
+  ctx.rotate(-0.28);
+  ctx.fillStyle = grad;
+  ctx.fillRect(-width, -height, width * 2, height * 2);
+  ctx.restore();
+}
+
+function drawSmashBallBurst(ctx, centerX, centerY, phase) {
+  const pulse = 1 + Math.sin(phase) * 0.035;
+
+  const halo = ctx.createRadialGradient(centerX, centerY, 24, centerX, centerY, 310 * pulse);
+  halo.addColorStop(0, "rgba(255,255,255,0.22)");
+  halo.addColorStop(0.14, "rgba(255,214,74,0.24)");
+  halo.addColorStop(0.34, "rgba(255,214,74,0.10)");
+  halo.addColorStop(0.58, "rgba(255,102,194,0.05)");
   halo.addColorStop(1, "rgba(255,255,255,0)");
   ctx.fillStyle = halo;
-  ctx.fillRect(centerX - 320, centerY - 320, 640, 640);
+  ctx.fillRect(centerX - 360, centerY - 360, 720, 720);
 
-  const rays = 16;
+  const rays = 18;
   ctx.save();
   ctx.translate(centerX, centerY);
   for (let i = 0; i < rays; i++) {
-    const angle = (Math.PI * 2 * i) / rays + phase * 0.08;
+    const angle = (Math.PI * 2 * i) / rays + phase * 0.055;
     ctx.save();
     ctx.rotate(angle);
-    const rayGrad = ctx.createLinearGradient(0, 0, 180, 0);
-    rayGrad.addColorStop(0, "rgba(255,255,255,0.26)");
-    rayGrad.addColorStop(0.18, "rgba(255,227,120,0.22)");
+    const rayGrad = ctx.createLinearGradient(0, 0, 210, 0);
+    rayGrad.addColorStop(0, "rgba(255,255,255,0.18)");
+    rayGrad.addColorStop(0.18, "rgba(255,226,130,0.18)");
     rayGrad.addColorStop(1, "rgba(255,255,255,0)");
     ctx.fillStyle = rayGrad;
-    ctx.fillRect(24, -3, 180, 6);
+    ctx.fillRect(28, -2.5, 210, 5);
     ctx.restore();
   }
   ctx.restore();
 
-  const slashGrad = ctx.createLinearGradient(centerX - 260, centerY - 160, centerX + 260, centerY + 160);
+  const slashGrad = ctx.createLinearGradient(centerX - 280, centerY - 170, centerX + 280, centerY + 170);
   slashGrad.addColorStop(0, "rgba(255,255,255,0)");
-  slashGrad.addColorStop(0.46, "rgba(255,255,255,0.06)");
-  slashGrad.addColorStop(0.5, "rgba(255,255,255,0.18)");
-  slashGrad.addColorStop(0.54, "rgba(255,255,255,0.06)");
+  slashGrad.addColorStop(0.46, "rgba(255,255,255,0.04)");
+  slashGrad.addColorStop(0.5, "rgba(255,255,255,0.13)");
+  slashGrad.addColorStop(0.54, "rgba(255,255,255,0.04)");
   slashGrad.addColorStop(1, "rgba(255,255,255,0)");
   ctx.fillStyle = slashGrad;
   ctx.save();
   ctx.translate(centerX, centerY);
-  ctx.rotate(-0.30);
-  ctx.fillRect(-320, -12, 640, 24);
+  ctx.rotate(-0.3);
+  ctx.fillRect(-350, -10, 700, 20);
+  ctx.restore();
+}
+
+function drawBackgroundGrid(ctx, width, height, phase) {
+  ctx.save();
+  ctx.globalAlpha = 0.08;
+  ctx.strokeStyle = "#AFC4FF";
+  ctx.lineWidth = 1;
+
+  const offset = (phase / (Math.PI * 2)) * 40;
+  const gap = 40;
+
+  for (let x = -gap + offset; x < width + gap; x += gap) {
+    ctx.beginPath();
+    ctx.moveTo(x, 0);
+    ctx.lineTo(x, height);
+    ctx.stroke();
+  }
+
+  for (let y = -gap + offset; y < height + gap; y += gap) {
+    ctx.beginPath();
+    ctx.moveTo(0, y);
+    ctx.lineTo(width, y);
+    ctx.stroke();
+  }
+
   ctx.restore();
 }
 
 function drawBackground(ctx, width, height, particles = null, orbs = null, sparkles = null, phase = 0) {
   const bg = ctx.createLinearGradient(0, 0, width, height);
-  bg.addColorStop(0, "#02040D");
-  bg.addColorStop(0.35, "#0B1032");
-  bg.addColorStop(0.68, "#150926");
+  bg.addColorStop(0, "#040713");
+  bg.addColorStop(0.28, "#0B1231");
+  bg.addColorStop(0.55, "#160C2A");
+  bg.addColorStop(0.82, "#0B1026");
   bg.addColorStop(1, "#05070F");
   ctx.fillStyle = bg;
   ctx.fillRect(0, 0, width, height);
 
-  const leftGlow = ctx.createRadialGradient(180, 180, 20, 180, 180, 420);
-  leftGlow.addColorStop(0, "rgba(255,79,184,0.15)");
-  leftGlow.addColorStop(1, "rgba(255,79,184,0)");
+  const topGlow = ctx.createRadialGradient(width / 2, 120, 30, width / 2, 120, 420);
+  topGlow.addColorStop(0, "rgba(255,213,74,0.16)");
+  topGlow.addColorStop(0.32, "rgba(255,213,74,0.07)");
+  topGlow.addColorStop(1, "rgba(255,213,74,0)");
+  ctx.fillStyle = topGlow;
+  ctx.fillRect(0, 0, width, height);
+
+  const leftGlow = ctx.createRadialGradient(130, 220, 10, 130, 220, 360);
+  leftGlow.addColorStop(0, "rgba(255,90,189,0.12)");
+  leftGlow.addColorStop(1, "rgba(255,90,189,0)");
   ctx.fillStyle = leftGlow;
   ctx.fillRect(0, 0, width, height);
 
-  const rightGlow = ctx.createRadialGradient(width - 180, 180, 20, width - 180, 180, 420);
-  rightGlow.addColorStop(0, "rgba(99,227,255,0.15)");
-  rightGlow.addColorStop(1, "rgba(99,227,255,0)");
+  const rightGlow = ctx.createRadialGradient(width - 140, 190, 10, width - 140, 190, 380);
+  rightGlow.addColorStop(0, "rgba(102,227,255,0.12)");
+  rightGlow.addColorStop(1, "rgba(102,227,255,0)");
   ctx.fillStyle = rightGlow;
   ctx.fillRect(0, 0, width, height);
 
+  drawBackgroundGrid(ctx, width, height, phase);
   drawSmashBallBurst(ctx, width / 2, 150, phase);
 
   if (orbs) drawOrbs(ctx, orbs, phase);
   if (sparkles) drawSparkles(ctx, sparkles, phase);
   if (particles) drawParticles(ctx, particles, phase);
+  drawSweep(ctx, width, height, phase);
 }
 
 function drawHeaderShimmer(ctx, x, y, width, height, phase) {
-  const t = (Math.sin(phase) + 1) / 2;
-  const shimmerX = x - 140 + t * (width + 280);
+  const t = (Math.sin(phase * 1.1) + 1) / 2;
+  const shimmerX = x - 180 + t * (width + 360);
 
   ctx.save();
-  drawRoundedRect(ctx, x, y, width, height, 28);
+  drawRoundedRect(ctx, x, y, width, height, 30);
   ctx.clip();
 
-  const grad = ctx.createLinearGradient(shimmerX - 180, 0, shimmerX + 180, 0);
+  const grad = ctx.createLinearGradient(shimmerX - 220, 0, shimmerX + 220, 0);
   grad.addColorStop(0, "rgba(255,255,255,0)");
-  grad.addColorStop(0.35, "rgba(255,255,255,0.08)");
-  grad.addColorStop(0.5, "rgba(255,255,255,0.22)");
-  grad.addColorStop(0.65, "rgba(255,255,255,0.08)");
+  grad.addColorStop(0.35, "rgba(255,255,255,0.04)");
+  grad.addColorStop(0.5, "rgba(255,255,255,0.16)");
+  grad.addColorStop(0.65, "rgba(255,255,255,0.04)");
   grad.addColorStop(1, "rgba(255,255,255,0)");
   ctx.fillStyle = grad;
-  ctx.fillRect(shimmerX - 200, y, 400, height);
+  ctx.fillRect(shimmerX - 240, y, 480, height);
 
   ctx.restore();
 }
 
-function drawHeader(ctx, width, phase) {
+function drawHeader(ctx, width, phase, totalPlayers) {
   const x = 24;
   const y = 18;
   const w = width - 48;
-  const h = 96;
+  const h = 100;
 
-  drawRoundedRect(ctx, x, y, w, h, 26);
+  drawRoundedRect(ctx, x, y, w, h, 30);
   const headerGrad = ctx.createLinearGradient(x, y, x + w, y);
-  headerGrad.addColorStop(0, "rgba(56,20,116,0.92)");
-  headerGrad.addColorStop(0.33, "rgba(54,47,146,0.92)");
-  headerGrad.addColorStop(0.66, "rgba(34,83,150,0.92)");
-  headerGrad.addColorStop(1, "rgba(56,131,163,0.92)");
+  headerGrad.addColorStop(0, "rgba(49,18,106,0.92)");
+  headerGrad.addColorStop(0.35, "rgba(46,45,145,0.92)");
+  headerGrad.addColorStop(0.7, "rgba(29,83,163,0.92)");
+  headerGrad.addColorStop(1, "rgba(27,133,162,0.92)");
   ctx.fillStyle = headerGrad;
   ctx.fill();
 
+  ctx.strokeStyle = "rgba(255,255,255,0.12)";
+  ctx.lineWidth = 2;
+  ctx.stroke();
+
   drawHeaderShimmer(ctx, x, y, w, h, phase);
 
-  ctx.fillStyle = "#F7FAFF";
+  ctx.fillStyle = "#F8FBFF";
   ctx.font = "bold 42px SmashFont";
-  ctx.fillText("SSBU LEADERBOARD", x + 26, y + 50);
+  ctx.fillText("SSBU LEADERBOARD", x + 28, y + 50);
 
-  ctx.fillStyle = "#D0DBFF";
+  ctx.fillStyle = "#D8E2FF";
   ctx.font = "20px SmashFont";
-  ctx.fillText("Official Ranked Order", x + 26, y + 78);
+  ctx.fillText("Official Ranked Order", x + 28, y + 78);
+
+  const pillW = 124;
+  const pillH = 36;
+  const pillX = x + w - pillW - 22;
+  const pillY = y + 24;
+
+  drawRoundedRect(ctx, pillX, pillY, pillW, pillH, 18);
+  ctx.fillStyle = "rgba(255,255,255,0.14)";
+  ctx.fill();
+
+  ctx.fillStyle = "#FFFFFF";
+  ctx.font = "bold 18px SmashFont";
+  const txt = `${totalPlayers} Players`;
+  const tw = ctx.measureText(txt).width;
+  ctx.fillText(txt, pillX + (pillW - tw) / 2, pillY + 24);
 }
 
 function drawRankBadge(ctx, x, y, place, colors) {
-  const w = 74;
+  const w = 76;
   const h = 44;
+
   drawRoundedRect(ctx, x, y, w, h, 14);
   ctx.fillStyle = colors.badgeBg;
   ctx.fill();
@@ -394,35 +499,102 @@ function drawRankBadge(ctx, x, y, place, colors) {
   ctx.fillText(text, x + (w - tw) / 2, y + 30);
 }
 
-function drawRecordPill(ctx, x, y, w, h, recordText) {
-  drawRoundedRect(ctx, x, y, w, h, 16);
-  ctx.fillStyle = "rgba(255,255,255,0.10)";
+function drawRecordPill(ctx, x, y, w, h, label, value, accentColor) {
+  drawRoundedRect(ctx, x, y, w, h, 18);
+  ctx.fillStyle = "rgba(255,255,255,0.09)";
   ctx.fill();
 
+  ctx.strokeStyle = "rgba(255,255,255,0.08)";
+  ctx.lineWidth = 1;
+  ctx.stroke();
+
+  ctx.fillStyle = accentColor;
+  ctx.font = "bold 15px SmashFont";
+  ctx.fillText(label, x + 14, y + 19);
+
   ctx.fillStyle = "#FFFFFF";
-  ctx.font = "bold 24px SmashFont";
-  const tw = ctx.measureText(recordText).width;
-  ctx.fillText(recordText, x + (w - tw) / 2, y + 28);
+  ctx.font = "bold 22px SmashFont";
+  const tw = ctx.measureText(value).width;
+  ctx.fillText(value, x + w - tw - 14, y + 30);
+}
+
+function drawCardSheen(ctx, x, y, w, h, phase, strength = 1) {
+  const t = (Math.sin(phase) + 1) / 2;
+  const sweepX = x - 80 + t * (w + 160);
+
+  ctx.save();
+  drawRoundedRect(ctx, x, y, w, h, 26);
+  ctx.clip();
+
+  const grad = ctx.createLinearGradient(sweepX - 90, 0, sweepX + 90, 0);
+  grad.addColorStop(0, "rgba(255,255,255,0)");
+  grad.addColorStop(0.45, `rgba(255,255,255,${0.03 * strength})`);
+  grad.addColorStop(0.5, `rgba(255,255,255,${0.12 * strength})`);
+  grad.addColorStop(0.55, `rgba(255,255,255,${0.03 * strength})`);
+  grad.addColorStop(1, "rgba(255,255,255,0)");
+
+  ctx.fillStyle = grad;
+  ctx.fillRect(sweepX - 110, y, 220, h);
+  ctx.restore();
+}
+
+function drawAvatarRing(ctx, cx, cy, r, colors, phase, champion = false) {
+  const pulse = champion ? 1 + Math.sin(phase) * 0.03 : 1 + Math.sin(phase) * 0.015;
+  const ringR = r + (champion ? 9 : 6) * pulse;
+
+  const ring = ctx.createRadialGradient(cx, cy, ringR - 4, cx, cy, ringR + 14);
+  ring.addColorStop(0, colors.glow);
+  ring.addColorStop(1, "rgba(255,255,255,0)");
+  ctx.fillStyle = ring;
+  ctx.beginPath();
+  ctx.arc(cx, cy, ringR + 14, 0, Math.PI * 2);
+  ctx.fill();
+
+  ctx.beginPath();
+  ctx.arc(cx, cy, ringR, 0, Math.PI * 2);
+  ctx.strokeStyle = colors.accent;
+  ctx.lineWidth = champion ? 5 : 4;
+  ctx.stroke();
+
+  ctx.beginPath();
+  ctx.arc(cx, cy, r + 2, 0, Math.PI * 2);
+  ctx.strokeStyle = "rgba(255,255,255,0.50)";
+  ctx.lineWidth = 2;
+  ctx.stroke();
 }
 
 function drawTopPlayerCard(ctx, entry, x, y, w, h, phase, isChampion = false) {
   const colors = getPlacementColors(entry.place);
-  const avatarSize = isChampion ? 140 : 102;
+  const avatarSize = isChampion ? 146 : 106;
+  const avatarRadius = avatarSize / 2;
+  const bob = isChampion ? Math.sin(phase) * 6 : Math.sin(phase + entry.place * 0.4) * 3.5;
   const pulse = isChampion
     ? 20 + (Math.sin(phase) + 1) * 8
-    : 12 + (Math.sin(phase + entry.place) + 1) * 3;
+    : 11 + (Math.sin(phase + entry.place) + 1) * 3;
 
   ctx.save();
   ctx.shadowColor = colors.glow;
   ctx.shadowBlur = pulse;
-  drawRoundedRect(ctx, x, y, w, h, 26);
-  ctx.fillStyle = colors.bg;
+  drawRoundedRect(ctx, x, y, w, h, 28);
+  ctx.fillStyle = createVerticalGradient(ctx, x, y, h, [
+    [0, colors.panelTop],
+    [1, colors.panelBottom]
+  ]);
   ctx.fill();
   ctx.restore();
 
-  drawRoundedRect(ctx, x, y, w, h, 26);
-  ctx.fillStyle = colors.bg;
+  drawRoundedRect(ctx, x, y, w, h, 28);
+  ctx.fillStyle = createVerticalGradient(ctx, x, y, h, [
+    [0, colors.panelTop],
+    [1, colors.panelBottom]
+  ]);
   ctx.fill();
+
+  ctx.strokeStyle = colors.trim;
+  ctx.lineWidth = 2;
+  ctx.stroke();
+
+  drawCardSheen(ctx, x, y, w, h, phase + entry.place * 0.4, isChampion ? 1.1 : 0.8);
 
   drawRoundedRect(ctx, x, y, 10, h, 5);
   ctx.fillStyle = colors.accent;
@@ -431,89 +603,92 @@ function drawTopPlayerCard(ctx, entry, x, y, w, h, phase, isChampion = false) {
   drawRankBadge(ctx, x + 18, y + 18, entry.place, colors);
 
   if (isChampion) {
-    const champX = x + w - 136;
+    const champX = x + w - 142;
     const champY = y + 18;
-    drawRoundedRect(ctx, champX, champY, 116, 28, 12);
-    ctx.fillStyle = "#FFD447";
+    drawRoundedRect(ctx, champX, champY, 122, 30, 13);
+    ctx.fillStyle = "#FFD54A";
     ctx.fill();
 
-    ctx.fillStyle = "#2D1B00";
+    ctx.fillStyle = "#2D1900";
     ctx.font = "bold 14px SmashFont";
     const txt = "CHAMPION";
     const tw = ctx.measureText(txt).width;
-    ctx.fillText(txt, champX + (116 - tw) / 2, champY + 19);
+    ctx.fillText(txt, champX + (122 - tw) / 2, champY + 20);
   }
 
-  const bob = isChampion ? Math.sin(phase) * 7 : Math.sin(phase + entry.place) * 3;
   const avatarX = x + (w - avatarSize) / 2;
-  const avatarY = y + 64 + bob;
+  const avatarY = y + 66 + bob;
+  const avatarCX = avatarX + avatarRadius;
+  const avatarCY = avatarY + avatarRadius;
+
+  drawAvatarRing(ctx, avatarCX, avatarCY, avatarRadius, colors, phase, isChampion);
 
   if (entry.avatarImage) {
     drawCircleImage(ctx, entry.avatarImage, avatarX, avatarY, avatarSize);
-    ctx.beginPath();
-    ctx.arc(
-      avatarX + avatarSize / 2,
-      avatarY + avatarSize / 2,
-      avatarSize / 2 + 2,
-      0,
-      Math.PI * 2
-    );
-    ctx.strokeStyle = "rgba(255,255,255,0.40)";
-    ctx.lineWidth = 3;
-    ctx.stroke();
   } else {
     ctx.beginPath();
-    ctx.arc(
-      avatarX + avatarSize / 2,
-      avatarY + avatarSize / 2,
-      avatarSize / 2,
-      0,
-      Math.PI * 2
-    );
-    ctx.fillStyle = "#2C366B";
+    ctx.arc(avatarCX, avatarCY, avatarRadius, 0, Math.PI * 2);
+    ctx.fillStyle = "#2A376B";
     ctx.fill();
 
-    ctx.fillStyle = "#F3F7FF";
-    ctx.font = `bold ${isChampion ? 44 : 36}px SmashFont`;
+    ctx.fillStyle = "#F6FAFF";
+    ctx.font = `bold ${isChampion ? 46 : 36}px SmashFont`;
     const initial = entry.canvasDisplayName.slice(0, 1).toUpperCase();
     const tw = ctx.measureText(initial).width;
-    ctx.fillText(initial, avatarX + (avatarSize - tw) / 2, avatarY + avatarSize / 2 + 16);
+    ctx.fillText(initial, avatarCX - tw / 2, avatarCY + 15);
   }
 
   ctx.fillStyle = colors.text;
   ctx.font = isChampion ? "bold 34px SmashFont" : "bold 28px SmashFont";
-  const name = truncateText(ctx, entry.canvasDisplayName, w - 40);
+  const name = truncateText(ctx, entry.canvasDisplayName, w - 42);
   const nameW = ctx.measureText(name).width;
-  ctx.fillText(name, x + (w - nameW) / 2, y + h - 96);
+  ctx.fillText(name, x + (w - nameW) / 2, y + h - 100);
 
-  ctx.fillStyle = "#DCE6FF";
-  ctx.font = "24px SmashFont";
+  ctx.fillStyle = colors.subtext;
+  ctx.font = "23px SmashFont";
   const rankText = `Rank #${entry.rank}`;
   const rankW = ctx.measureText(rankText).width;
-  ctx.fillText(rankText, x + (w - rankW) / 2, y + h - 58);
+  ctx.fillText(rankText, x + (w - rankW) / 2, y + h - 62);
 
-  const pillW = 170;
+  const pillW = isChampion ? 198 : 178;
   const pillH = 42;
   const pillX = x + (w - pillW) / 2;
   const pillY = y + h - 38;
-  drawRecordPill(ctx, pillX, pillY, pillW, pillH, `${entry.setWins}-${entry.setLosses}`);
+  drawRecordPill(ctx, pillX, pillY, pillW, pillH, "SET RECORD", `${entry.setWins}-${entry.setLosses}`, colors.accentSoft);
 }
 
 function drawLowerCard(ctx, entry, x, y, w, h, phase) {
   const colors = getPlacementColors(entry.place);
-  const pulse = 10 + (Math.sin(phase + entry.place * 0.35) + 1) * 2;
+  const pulse = 8 + (Math.sin(phase + entry.place * 0.4) + 1) * 2.4;
+  const avatarSize = 68;
+  const avatarX = x + 114;
+  const avatarY = y + (h - avatarSize) / 2;
+  const avatarCX = avatarX + avatarSize / 2;
+  const avatarCY = avatarY + avatarSize / 2;
 
   ctx.save();
   ctx.shadowColor = colors.glow;
   ctx.shadowBlur = pulse;
   drawRoundedRect(ctx, x, y, w, h, 22);
-  ctx.fillStyle = colors.bg;
+  ctx.fillStyle = createVerticalGradient(ctx, x, y, h, [
+    [0, colors.panelTop],
+    [1, colors.panelBottom]
+  ]);
   ctx.fill();
   ctx.restore();
 
   drawRoundedRect(ctx, x, y, w, h, 22);
-  ctx.fillStyle = colors.bg;
+  ctx.fillStyle = createVerticalGradient(ctx, x, y, h, [
+    [0, colors.panelTop],
+    [1, colors.panelBottom]
+  ]);
   ctx.fill();
+
+  ctx.strokeStyle = colors.trim;
+  ctx.lineWidth = 1.5;
+  ctx.stroke();
+
+  drawCardSheen(ctx, x, y, w, h, phase + entry.place * 0.25, 0.7);
 
   drawRoundedRect(ctx, x, y, 8, h, 5);
   ctx.fillStyle = colors.accent;
@@ -521,45 +696,38 @@ function drawLowerCard(ctx, entry, x, y, w, h, phase) {
 
   drawRankBadge(ctx, x + 18, y + 18, entry.place, colors);
 
-  const avatarSize = 68;
-  const avatarX = x + 112;
-  const avatarY = y + (h - avatarSize) / 2;
+  drawAvatarRing(ctx, avatarCX, avatarCY, avatarSize / 2, colors, phase + entry.place * 0.2, false);
 
   if (entry.avatarImage) {
     drawCircleImage(ctx, entry.avatarImage, avatarX, avatarY, avatarSize);
-    ctx.beginPath();
-    ctx.arc(avatarX + avatarSize / 2, avatarY + avatarSize / 2, avatarSize / 2 + 2, 0, Math.PI * 2);
-    ctx.strokeStyle = "rgba(255,255,255,0.36)";
-    ctx.lineWidth = 3;
-    ctx.stroke();
   } else {
     ctx.beginPath();
-    ctx.arc(avatarX + avatarSize / 2, avatarY + avatarSize / 2, avatarSize / 2, 0, Math.PI * 2);
-    ctx.fillStyle = "#2C366B";
+    ctx.arc(avatarCX, avatarCY, avatarSize / 2, 0, Math.PI * 2);
+    ctx.fillStyle = "#2A376B";
     ctx.fill();
 
-    ctx.fillStyle = "#F3F7FF";
-    ctx.font = "bold 26px SmashFont";
+    ctx.fillStyle = "#F6FAFF";
+    ctx.font = "bold 27px SmashFont";
     const initial = entry.canvasDisplayName.slice(0, 1).toUpperCase();
     const tw = ctx.measureText(initial).width;
-    ctx.fillText(initial, avatarX + (avatarSize - tw) / 2, avatarY + 44);
+    ctx.fillText(initial, avatarCX - tw / 2, avatarCY + 10);
   }
 
-  const textX = avatarX + avatarSize + 18;
-  ctx.fillStyle = "#F6FAFF";
+  const textX = avatarX + avatarSize + 20;
+  ctx.fillStyle = colors.text;
   ctx.font = "bold 28px SmashFont";
-  const name = truncateText(ctx, entry.canvasDisplayName, 400);
-  ctx.fillText(name, textX, y + 44);
+  const name = truncateText(ctx, entry.canvasDisplayName, 410);
+  ctx.fillText(name, textX, y + 43);
 
-  ctx.fillStyle = "#DCE6FF";
+  ctx.fillStyle = colors.subtext;
   ctx.font = "22px SmashFont";
-  ctx.fillText(`Rank #${entry.rank}`, textX, y + 76);
+  ctx.fillText(`Rank #${entry.rank}`, textX, y + 75);
 
-  const pillW = 190;
-  const pillH = 42;
-  const pillX = x + w - pillW - 24;
-  const pillY = y + 30;
-  drawRecordPill(ctx, pillX, pillY, pillW, pillH, `${entry.setWins}-${entry.setLosses}`);
+  const recordW = 198;
+  const recordH = 42;
+  const recordX = x + w - recordW - 22;
+  const recordY = y + 18;
+  drawRecordPill(ctx, recordX, recordY, recordW, recordH, "SET RECORD", `${entry.setWins}-${entry.setLosses}`, colors.accentSoft);
 }
 
 function drawTopSection(ctx, entries, width, phase) {
@@ -612,42 +780,49 @@ function drawLeaderboardFrame(
   phase = 0
 ) {
   drawBackground(ctx, width, height, particles, orbs, sparkles, phase);
-  drawHeader(ctx, width, phase);
+  drawHeader(ctx, width, phase, entries.length);
   drawTopSection(ctx, entries, width, phase);
   drawLowerSection(ctx, entries, width, phase);
 }
 
+function getLeaderboardHeight(entryCount) {
+  if (entryCount <= 3) return 900;
+  return 538 + (entryCount - 3) * 118 + 120;
+}
+
 async function generateLeaderboardImage(rows, guild) {
-  const entries = await buildLeaderboardEntries(guild, rows.slice(0, 10));
+  const entries = await buildLeaderboardEntries(guild, rows);
   const width = 1280;
-  const height = entries.length <= 3 ? 900 : 538 + (entries.length - 3) * 118 + 120;
+  const height = getLeaderboardHeight(entries.length);
 
   const canvas = createCanvas(width, height);
   const ctx = canvas.getContext("2d");
+
   drawLeaderboardFrame(ctx, entries, width, height);
 
   return canvas.toBuffer("image/png");
 }
 
 async function generateAnimatedLeaderboardGif(rows, guild) {
-  const entries = await buildLeaderboardEntries(guild, rows.slice(0, 10));
+  const entries = await buildLeaderboardEntries(guild, rows);
   const width = 1280;
-  const height = entries.length <= 3 ? 900 : 538 + (entries.length - 3) * 118 + 120;
+  const height = getLeaderboardHeight(entries.length);
 
   const encoder = new GIFEncoder(width, height);
   encoder.start();
   encoder.setRepeat(0);
-  encoder.setDelay(70);
-  encoder.setQuality(10);
+  encoder.setDelay(55);
+  encoder.setQuality(9);
 
   const canvas = createCanvas(width, height);
   const ctx = canvas.getContext("2d");
 
-  const particles = createParticles(width, height, 120);
-  const orbs = createEnergyOrbs(width, height, 16);
-  const sparkles = createSparkles(width, height, 20);
+  const particles = createParticles(width, height, 130);
+  const orbs = createEnergyOrbs(width, height, 18);
+  const sparkles = createSparkles(width, height, 24);
 
-  const frameCount = 36;
+  const frameCount = 48;
+
   for (let frame = 0; frame < frameCount; frame++) {
     const phase = (frame / frameCount) * Math.PI * 2;
     ctx.clearRect(0, 0, width, height);
