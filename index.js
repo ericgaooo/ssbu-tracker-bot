@@ -29,8 +29,7 @@ const {
 } = require("./leaderboardRenderer");
 
 const {
-  generateAndrewSpikeImage,
-  generateAndrewSpikeGif
+  generateAndrewSpikeImage
 } = require("./andrewSpikeRenderer");
 
 const client = new Client({
@@ -531,29 +530,6 @@ client.on("interactionCreate", async (interaction) => {
 
       const attachment = new AttachmentBuilder(imageBuffer, {
         name: "andrew-spiker-leaderboard.png"
-      });
-
-      await interaction.editReply({
-        content: "💥 **Andrew Spiker Leaderboard**",
-        files: [attachment]
-      });
-      return;
-    }
-
-    if (interaction.commandName === "andrewspikeanimated") {
-      const rows = getAndrewSpikeLeaderboard();
-
-      if (rows.length === 0) {
-        await interaction.reply("No Andrew spikes have been recorded yet.");
-        return;
-      }
-
-      await interaction.deferReply();
-      const rowsWithNames = await withGuildDisplayNames(interaction.guild, rows);
-      const gifBuffer = await generateAndrewSpikeGif(rowsWithNames);
-
-      const attachment = new AttachmentBuilder(gifBuffer, {
-        name: "andrew-spiker-leaderboard.gif"
       });
 
       await interaction.editReply({

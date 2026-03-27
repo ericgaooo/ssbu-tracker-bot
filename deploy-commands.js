@@ -121,10 +121,6 @@ const commands = [
     .setDescription("Show the Andrew Spiker leaderboard as an image"),
 
   new SlashCommandBuilder()
-    .setName("andrewspikeanimated")
-    .setDescription("Show the Andrew Spiker leaderboard as an animated gif"),
-
-  new SlashCommandBuilder()
     .setName("setandrewspikes")
     .setDescription("Admin: manually set a player's Andrew spike count")
     .addUserOption(option =>

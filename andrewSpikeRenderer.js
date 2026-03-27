@@ -1,5 +1,4 @@
 const { createCanvas } = require("canvas");
-const GIFEncoder = require("gifencoder");
 
 function clampText(ctx, text, maxWidth) {
   let output = String(text ?? "");
@@ -9,37 +8,18 @@ function clampText(ctx, text, maxWidth) {
   return output === text ? output : `${output}…`;
 }
 
-function drawBackground(ctx, width, height, frame = 0) {
-  const bg = ctx.createLinearGradient(0, 0, width, height);
-  bg.addColorStop(0, "#120f1f");
-  bg.addColorStop(0.45, "#231942");
-  bg.addColorStop(1, "#0f172a");
-  ctx.fillStyle = bg;
-  ctx.fillRect(0, 0, width, height);
-
-  for (let i = 0; i < 18; i += 1) {
-    const x = (i * 79 + frame * 14) % (width + 180) - 90;
-    const y = 100 + ((i * 97) % (height - 200));
-    const r = 18 + (i % 4) * 10;
-
-    const glow = ctx.createRadialGradient(x, y, 0, x, y, r * 2.8);
-    glow.addColorStop(0, "rgba(255, 214, 10, 0.22)");
-    glow.addColorStop(0.5, "rgba(255, 122, 0, 0.12)");
-    glow.addColorStop(1, "rgba(255, 255, 255, 0)");
-    ctx.fillStyle = glow;
-    ctx.beginPath();
-    ctx.arc(x, y, r * 2.8, 0, Math.PI * 2);
-    ctx.fill();
-  }
-
-  ctx.save();
-  ctx.globalAlpha = 0.09;
-  for (let i = 0; i < 9; i += 1) {
-    const x = 100 + i * 125 + Math.sin((frame + i) * 0.35) * 18;
-    const y = 160 + (i % 3) * 210;
-    drawImpactBurst(ctx, x, y, 26 + (i % 3) * 8, "#ffffff");
-  }
-  ctx.restore();
+function roundRect(ctx, x, y, width, height, radius) {
+  ctx.beginPath();
+  ctx.moveTo(x + radius, y);
+  ctx.lineTo(x + width - radius, y);
+  ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+  ctx.lineTo(x + width, y + height - radius);
+  ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+  ctx.lineTo(x + radius, y + height);
+  ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+  ctx.lineTo(x, y + radius);
+  ctx.quadraticCurveTo(x, y, x + radius, y);
+  ctx.closePath();
 }
 
 function drawImpactBurst(ctx, cx, cy, radius, color) {
@@ -79,9 +59,11 @@ function drawSpikeBall(ctx, x, y, r, rotation = 0) {
 
   ctx.strokeStyle = "rgba(84, 35, 0, 0.42)";
   ctx.lineWidth = Math.max(2, r * 0.08);
+
   ctx.beginPath();
   ctx.arc(0, 0, r * 0.72, Math.PI * 0.22, Math.PI * 1.1);
   ctx.stroke();
+
   ctx.beginPath();
   ctx.arc(0, 0, r * 0.78, Math.PI * 1.22, Math.PI * 1.95);
   ctx.stroke();
@@ -99,7 +81,40 @@ function drawSpikeBall(ctx, x, y, r, rotation = 0) {
   ctx.restore();
 }
 
-function drawHeader(ctx, width, frame) {
+function drawBackground(ctx, width, height) {
+  const bg = ctx.createLinearGradient(0, 0, width, height);
+  bg.addColorStop(0, "#120f1f");
+  bg.addColorStop(0.45, "#231942");
+  bg.addColorStop(1, "#0f172a");
+  ctx.fillStyle = bg;
+  ctx.fillRect(0, 0, width, height);
+
+  for (let i = 0; i < 18; i += 1) {
+    const x = (i * 79) % (width + 180) - 90;
+    const y = 100 + ((i * 97) % (height - 200));
+    const r = 18 + (i % 4) * 10;
+
+    const glow = ctx.createRadialGradient(x, y, 0, x, y, r * 2.8);
+    glow.addColorStop(0, "rgba(255, 214, 10, 0.22)");
+    glow.addColorStop(0.5, "rgba(255, 122, 0, 0.12)");
+    glow.addColorStop(1, "rgba(255, 255, 255, 0)");
+    ctx.fillStyle = glow;
+    ctx.beginPath();
+    ctx.arc(x, y, r * 2.8, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  ctx.save();
+  ctx.globalAlpha = 0.09;
+  for (let i = 0; i < 9; i += 1) {
+    const x = 100 + i * 125;
+    const y = 160 + (i % 3) * 210;
+    drawImpactBurst(ctx, x, y, 26 + (i % 3) * 8, "#ffffff");
+  }
+  ctx.restore();
+}
+
+function drawHeader(ctx, width) {
   ctx.save();
 
   ctx.fillStyle = "rgba(255,255,255,0.08)";
@@ -114,14 +129,13 @@ function drawHeader(ctx, width, frame) {
   ctx.fillStyle = "#ffd166";
   ctx.fillText("Documenting crimes against the newest player", 90, 148);
 
-  const bounce = Math.sin(frame * 0.35) * 6;
-  drawSpikeBall(ctx, width - 115, 110 + bounce, 42, frame * 0.12);
-  drawImpactBurst(ctx, width - 115, 110 + bounce, 30 + Math.sin(frame * 0.35) * 3, "rgba(255,255,255,0.65)");
+  drawSpikeBall(ctx, width - 115, 110, 42, 0.4);
+  drawImpactBurst(ctx, width - 115, 110, 30, "rgba(255,255,255,0.65)");
 
   ctx.restore();
 }
 
-function drawAndrewZone(ctx, width, height, frame) {
+function drawAndrewZone(ctx, width, height) {
   const zoneY = height - 185;
 
   const zone = ctx.createLinearGradient(0, zoneY, 0, height);
@@ -131,8 +145,6 @@ function drawAndrewZone(ctx, width, height, frame) {
   roundRect(ctx, 56, zoneY, width - 112, 120, 28);
   ctx.fill();
 
-  const wobble = Math.sin(frame * 0.5) * 5;
-
   ctx.font = "bold 36px Sans";
   ctx.fillStyle = "#ffe8e8";
   ctx.fillText("Andrew danger zone", 88, zoneY + 48);
@@ -141,17 +153,15 @@ function drawAndrewZone(ctx, width, height, frame) {
   ctx.fillStyle = "#ffd1d1";
   ctx.fillText("Current defensive rating: absolutely cooked", 88, zoneY + 84);
 
-  drawImpactBurst(ctx, width - 125, zoneY + 58 + wobble, 26 + Math.sin(frame * 0.45) * 2, "#ffb703");
-  drawSpikeBall(ctx, width - 125, zoneY + 58 + wobble, 28, frame * 0.18);
+  drawImpactBurst(ctx, width - 125, zoneY + 58, 26, "#ffb703");
+  drawSpikeBall(ctx, width - 125, zoneY + 58, 28, 0.2);
 }
 
-function drawRow(ctx, row, index, x, y, width, frame) {
+function drawRow(ctx, row, index, x, y, width) {
   const isTop = index === 0;
   const cardHeight = 92;
-  const lift = isTop ? Math.sin(frame * 0.45) * 3 : 0;
 
   ctx.save();
-  ctx.translate(0, lift);
 
   const fill = ctx.createLinearGradient(x, y, x + width, y + cardHeight);
   if (isTop) {
@@ -202,35 +212,26 @@ function drawRow(ctx, row, index, x, y, width, frame) {
   ctx.restore();
 }
 
-function roundRect(ctx, x, y, width, height, radius) {
-  ctx.beginPath();
-  ctx.moveTo(x + radius, y);
-  ctx.lineTo(x + width - radius, y);
-  ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
-  ctx.lineTo(x + width, y + height - radius);
-  ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
-  ctx.lineTo(x + radius, y + height);
-  ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
-  ctx.lineTo(x, y + radius);
-  ctx.quadraticCurveTo(x, y, x + radius, y);
-  ctx.closePath();
-}
-
 function getCanvasHeight(rowCount) {
   const visibleRows = Math.max(1, rowCount);
   return Math.max(760, 250 + visibleRows * 108 + 170);
 }
 
-function drawFrame(ctx, rows, width, height, frame) {
-  drawBackground(ctx, width, height, frame);
-  drawHeader(ctx, width, frame);
+async function generateAndrewSpikeImage(rows) {
+  const width = 1000;
+  const height = getCanvasHeight(rows.length);
+  const canvas = createCanvas(width, height);
+  const ctx = canvas.getContext("2d");
+
+  drawBackground(ctx, width, height);
+  drawHeader(ctx, width);
 
   const startY = 230;
   const rowWidth = width - 112;
   const rowX = 56;
 
   rows.forEach((row, index) => {
-    drawRow(ctx, row, index, rowX, startY + index * 108, rowWidth, frame);
+    drawRow(ctx, row, index, rowX, startY + index * 108, rowWidth);
   });
 
   if (rows.length === 0) {
@@ -243,14 +244,12 @@ function drawFrame(ctx, rows, width, height, frame) {
     ctx.fillText("No Andrew spikes recorded yet.", 90, 314);
   }
 
-  drawAndrewZone(ctx, width, height, frame);
+  drawAndrewZone(ctx, width, height);
 
   if (rows.length > 0) {
-    const stampPulse = 1 + Math.sin(frame * 0.45) * 0.03;
     ctx.save();
     ctx.translate(width - 205, 210);
     ctx.rotate(-0.18);
-    ctx.scale(stampPulse, stampPulse);
 
     ctx.strokeStyle = "rgba(255, 80, 80, 0.95)";
     ctx.lineWidth = 5;
@@ -264,42 +263,10 @@ function drawFrame(ctx, rows, width, height, frame) {
     ctx.restore();
     ctx.textAlign = "left";
   }
-}
-
-async function generateAndrewSpikeImage(rows) {
-  const width = 1000;
-  const height = getCanvasHeight(rows.length);
-  const canvas = createCanvas(width, height);
-  const ctx = canvas.getContext("2d");
-
-  drawFrame(ctx, rows, width, height, 0);
 
   return canvas.toBuffer("image/png");
 }
 
-async function generateAndrewSpikeGif(rows) {
-  const width = 1000;
-  const height = getCanvasHeight(rows.length);
-  const canvas = createCanvas(width, height);
-  const ctx = canvas.getContext("2d");
-
-  const encoder = new GIFEncoder(width, height);
-  encoder.start();
-  encoder.setRepeat(0);
-  encoder.setDelay(70);
-  encoder.setQuality(10);
-
-  const totalFrames = 18;
-  for (let frame = 0; frame < totalFrames; frame += 1) {
-    drawFrame(ctx, rows, width, height, frame);
-    encoder.addFrame(ctx);
-  }
-
-  encoder.finish();
-  return encoder.out.getData();
-}
-
 module.exports = {
-  generateAndrewSpikeImage,
-  generateAndrewSpikeGif
+  generateAndrewSpikeImage
 };

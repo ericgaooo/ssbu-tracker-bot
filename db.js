@@ -364,26 +364,6 @@ function getLeaderboard() {
   return rankedRows;
 }
 
-function ensureAndrewSpiker(userId, username) {
-  const db = readDb();
-
-  if (!db.andrew_spikes[userId]) {
-    db.andrew_spikes[userId] = {
-      user_id: userId,
-      username,
-      count: 0,
-      updated_at: new Date().toISOString(),
-      last_spike_at: null
-    };
-  } else {
-    db.andrew_spikes[userId].username = username;
-    db.andrew_spikes[userId].updated_at = new Date().toISOString();
-  }
-
-  writeDb(db);
-  return db.andrew_spikes[userId];
-}
-
 function incrementAndrewSpike(userId, username) {
   const db = readDb();
 
@@ -463,7 +443,6 @@ module.exports = {
   getDerivedRecordForUser,
   getHeadToHead,
   getLeaderboard,
-  ensureAndrewSpiker,
   incrementAndrewSpike,
   setAndrewSpikeCount,
   getAndrewSpikeCount,
