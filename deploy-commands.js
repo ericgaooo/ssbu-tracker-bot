@@ -11,7 +11,7 @@ const formatChoices = [
 
 const commands = [
   new SlashCommandBuilder()
-    .setName("report-set")
+    .setName("smashreportset")
     .setDescription("Report a full set that you played")
     .addUserOption(option =>
       option.setName("opponent").setDescription("Who you played against").setRequired(true)
@@ -29,62 +29,62 @@ const commands = [
     ),
 
   new SlashCommandBuilder()
-    .setName("report-game-win")
+    .setName("smashreportgamewin")
     .setDescription("Quickly report a single game win")
     .addUserOption(option =>
       option.setName("opponent").setDescription("Who you beat").setRequired(true)
     ),
 
   new SlashCommandBuilder()
-    .setName("report-game-loss")
+    .setName("smashreportgameloss")
     .setDescription("Quickly report a single game loss")
     .addUserOption(option =>
       option.setName("opponent").setDescription("Who beat you").setRequired(true)
     ),
 
   new SlashCommandBuilder()
-    .setName("my-record")
+    .setName("smashmyrecord")
     .setDescription("Show your Smash record"),
 
   new SlashCommandBuilder()
-    .setName("player-record")
+    .setName("smashplayerrecord")
     .setDescription("Show another player's Smash record")
     .addUserOption(option =>
       option.setName("user").setDescription("Player to look up").setRequired(true)
     ),
 
   new SlashCommandBuilder()
-    .setName("record-against")
+    .setName("smashrecordagainst")
     .setDescription("Show your record against another player")
     .addUserOption(option =>
       option.setName("opponent").setDescription("Opponent to compare against").setRequired(true)
     ),
 
   new SlashCommandBuilder()
-    .setName("leaderboard")
+    .setName("smashleaderboard")
     .setDescription("Show the official ranked leaderboard in text"),
 
   new SlashCommandBuilder()
-    .setName("leaderboard-image")
+    .setName("smashleaderboardimage")
     .setDescription("Show the official ranked leaderboard as an image"),
 
   new SlashCommandBuilder()
-    .setName("leaderboard-animated")
+    .setName("smashleaderboardanimated")
     .setDescription("Show the official ranked leaderboard as an animated image"),
 
   new SlashCommandBuilder()
-    .setName("my-rank")
+    .setName("smashmyrank")
     .setDescription("Show your rank"),
 
   new SlashCommandBuilder()
-    .setName("player-rank")
+    .setName("smashplayerrank")
     .setDescription("Show another player's rank")
     .addUserOption(option =>
       option.setName("user").setDescription("Player to look up").setRequired(true)
     ),
 
   new SlashCommandBuilder()
-    .setName("set-rank")
+    .setName("smashsetrank")
     .setDescription("Set a player's official rank")
     .addUserOption(option =>
       option.setName("user").setDescription("Player whose rank to set").setRequired(true)
@@ -94,14 +94,14 @@ const commands = [
     ),
 
   new SlashCommandBuilder()
-    .setName("my-reports")
+    .setName("smashmyreports")
     .setDescription("Show your recent reports"),
 
   new SlashCommandBuilder()
-    .setName("delete-report")
+    .setName("smashdeletereport")
     .setDescription("Delete one of your reports by report ID")
     .addStringOption(option =>
-      option.setName("report_id").setDescription("Report ID from /my-reports").setRequired(true)
+      option.setName("report_id").setDescription("Report ID from /smashmyreports").setRequired(true)
     )
 ].map(command => command.toJSON());
 

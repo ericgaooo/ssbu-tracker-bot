@@ -7,6 +7,16 @@ const {
 const { createCanvas, loadImage, registerFont } = require("canvas");
 const GIFEncoder = require("gif-encoder-2");
 
+registerFont("./assets/fonts/Nunito-Bold.ttf", {
+  family: "SmashFont",
+  weight: "bold"
+});
+
+registerFont("./assets/fonts/Nunito-Regular.ttf", {
+  family: "SmashFont",
+  weight: "normal"
+});
+
 const {
   ensurePlayer,
   setPlayerRank,
@@ -21,17 +31,6 @@ const {
   getLeaderboard
 } = require("./db");
 
-registerFont("./assets/fonts/Nunito-Bold.ttf", {
-    family: "SmashFont",
-    weight: "bold"
-  });
-  
-  registerFont("./assets/fonts/Nunito-Regular.ttf", {
-    family: "SmashFont",
-    weight: "normal"
-  });
-
-  
 const client = new Client({
   intents: [GatewayIntentBits.Guilds]
 });
@@ -526,7 +525,7 @@ function drawPodiumBlock(ctx, entry, x, y, width, height, frame) {
   const recordPillW = 170;
   const recordPillH = 42;
   const recordPillX = x + (width - recordPillW) / 2;
-  const recordPillY = y + height - 162;
+  const recordPillY = y + height - 128;
 
   drawRoundedRect(ctx, recordPillX, recordPillY, recordPillW, recordPillH, 16);
   ctx.fillStyle = "rgba(255,255,255,0.10)";
@@ -537,12 +536,6 @@ function drawPodiumBlock(ctx, entry, x, y, width, height, frame) {
   const recordText = `${entry.setWins}-${entry.setLosses}`;
   const recordWidth = ctx.measureText(recordText).width;
   ctx.fillText(recordText, recordPillX + (recordPillW - recordWidth) / 2, recordPillY + 28);
-
-  ctx.fillStyle = "#C9D7FF";
-  ctx.font = "18px SmashFont";
-  const subText = `${entry.setsPlayed} sets`;
-  const subWidth = ctx.measureText(subText).width;
-  ctx.fillText(subText, x + (width - subWidth) / 2, y + height - 16);
 
   if (entry.place === 1) {
     const champPillW = 118;
@@ -647,12 +640,6 @@ function drawListCard(ctx, entry, x, y, width, height, frame) {
   const recordText = `${entry.setWins}-${entry.setLosses}`;
   const recordWidth = ctx.measureText(recordText).width;
   ctx.fillText(recordText, recordPillX + (recordPillW - recordWidth) / 2, recordPillY + 28);
-
-  ctx.fillStyle = "#C9D7FF";
-  ctx.font = "18px SmashFont";
-  const subText = `${entry.setsPlayed} sets played`;
-  const subWidth = ctx.measureText(subText).width;
-  ctx.fillText(subText, recordPillX + (recordPillW - subWidth) / 2, y + 78);
 }
 
 function drawLeaderboardFrame(ctx, entries, width, height, backParticles = null, frontParticles = null, orbs = null, sparkles = null, burstParticles = null, frame = 0) {
@@ -780,7 +767,7 @@ client.on("interactionCreate", async (interaction) => {
   if (!interaction.isChatInputCommand()) return;
 
   try {
-    if (interaction.commandName === "report-set") {
+    if (interaction.commandName === "smashreportset") {
       const reporter = interaction.user;
       const opponent = interaction.options.getUser("opponent");
       const format = interaction.options.getString("format");
@@ -831,10 +818,10 @@ client.on("interactionCreate", async (interaction) => {
       return;
     }
 
-    if (interaction.commandName === "report-game-win" || interaction.commandName === "report-game-loss") {
+    if (interaction.commandName === "smashreportgamewin" || interaction.commandName === "smashreportgameloss") {
       const reporter = interaction.user;
       const opponent = interaction.options.getUser("opponent");
-      const result = interaction.commandName === "report-game-win" ? "win" : "loss";
+      const result = interaction.commandName === "smashreportgamewin" ? "win" : "loss";
 
       if (opponent.id === reporter.id) {
         await interaction.reply("You cannot report a result against yourself.");
@@ -867,7 +854,7 @@ client.on("interactionCreate", async (interaction) => {
       return;
     }
 
-    if (interaction.commandName === "my-record") {
+    if (interaction.commandName === "smashmyrecord") {
       const user = interaction.user;
       const displayName =
         await getDisplayNameFromGuild(interaction.guild, user.id, user.globalName || user.username);
@@ -878,7 +865,7 @@ client.on("interactionCreate", async (interaction) => {
       return;
     }
 
-    if (interaction.commandName === "player-record") {
+    if (interaction.commandName === "smashplayerrecord") {
       const user = interaction.options.getUser("user");
       const displayName =
         await getDisplayNameFromGuild(interaction.guild, user.id, user.globalName || user.username);
@@ -889,7 +876,7 @@ client.on("interactionCreate", async (interaction) => {
       return;
     }
 
-    if (interaction.commandName === "record-against") {
+    if (interaction.commandName === "smashrecordagainst") {
       const self = interaction.user;
       const opponent = interaction.options.getUser("opponent");
 
@@ -915,7 +902,7 @@ client.on("interactionCreate", async (interaction) => {
       return;
     }
 
-    if (interaction.commandName === "leaderboard") {
+    if (interaction.commandName === "smashleaderboard") {
       const rows = getLeaderboard();
 
       if (rows.length === 0) {
@@ -934,7 +921,7 @@ client.on("interactionCreate", async (interaction) => {
       return;
     }
 
-    if (interaction.commandName === "leaderboard-image") {
+    if (interaction.commandName === "smashleaderboardimage") {
       const rows = getLeaderboard();
 
       if (rows.length === 0) {
@@ -956,7 +943,7 @@ client.on("interactionCreate", async (interaction) => {
       return;
     }
 
-    if (interaction.commandName === "leaderboard-animated") {
+    if (interaction.commandName === "smashleaderboardanimated") {
       const rows = getLeaderboard();
 
       if (rows.length === 0) {
@@ -978,7 +965,7 @@ client.on("interactionCreate", async (interaction) => {
       return;
     }
 
-    if (interaction.commandName === "my-rank") {
+    if (interaction.commandName === "smashmyrank") {
       const user = interaction.user;
       const displayName =
         await getDisplayNameFromGuild(interaction.guild, user.id, user.globalName || user.username);
@@ -993,7 +980,7 @@ client.on("interactionCreate", async (interaction) => {
       return;
     }
 
-    if (interaction.commandName === "player-rank") {
+    if (interaction.commandName === "smashplayerrank") {
       const user = interaction.options.getUser("user");
       const displayName =
         await getDisplayNameFromGuild(interaction.guild, user.id, user.globalName || user.username);
@@ -1008,7 +995,7 @@ client.on("interactionCreate", async (interaction) => {
       return;
     }
 
-    if (interaction.commandName === "set-rank") {
+    if (interaction.commandName === "smashsetrank") {
       if (!ADMIN_USER_ID || interaction.user.id !== ADMIN_USER_ID) {
         await interaction.reply("You are not allowed to set ranks.");
         return;
@@ -1031,7 +1018,7 @@ client.on("interactionCreate", async (interaction) => {
       return;
     }
 
-    if (interaction.commandName === "my-reports") {
+    if (interaction.commandName === "smashmyreports") {
       const reports = getReportsByReporter(interaction.user.id, 15);
 
       if (reports.length === 0) {
@@ -1044,7 +1031,7 @@ client.on("interactionCreate", async (interaction) => {
       return;
     }
 
-    if (interaction.commandName === "delete-report") {
+    if (interaction.commandName === "smashdeletereport") {
       const reportId = interaction.options.getString("report_id");
 
       let result = deleteSetReportById(reportId, interaction.user.id);
