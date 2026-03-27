@@ -124,10 +124,10 @@ function getPlacementColors(place) {
       accentSoft: "#FFF0A6",
       text: "#FFF8DB",
       subtext: "#F0E4B5",
-      glow: "rgba(255, 213, 74, 0.55)",
+      glow: "rgba(255, 213, 74, 0.36)",
       badgeBg: "#FFE27A",
       badgeText: "#2F1A00",
-      trim: "rgba(255, 225, 140, 0.65)"
+      trim: "rgba(255, 225, 140, 0.55)"
     };
   }
 
@@ -139,10 +139,10 @@ function getPlacementColors(place) {
       accentSoft: "#FFFFFF",
       text: "#F6F8FF",
       subtext: "#DDE5FF",
-      glow: "rgba(221, 230, 255, 0.32)",
+      glow: "rgba(221, 230, 255, 0.22)",
       badgeBg: "#EEF2FF",
       badgeText: "#1B2547",
-      trim: "rgba(221, 230, 255, 0.36)"
+      trim: "rgba(221, 230, 255, 0.28)"
     };
   }
 
@@ -154,10 +154,10 @@ function getPlacementColors(place) {
       accentSoft: "#FFE0CC",
       text: "#FFF0E7",
       subtext: "#FFD7C1",
-      glow: "rgba(255, 183, 138, 0.34)",
+      glow: "rgba(255, 183, 138, 0.24)",
       badgeBg: "#FFD7BD",
       badgeText: "#4A2413",
-      trim: "rgba(255, 183, 138, 0.34)"
+      trim: "rgba(255, 183, 138, 0.26)"
     };
   }
 
@@ -168,64 +168,53 @@ function getPlacementColors(place) {
     accentSoft: "#DCE8FF",
     text: "#F5F8FF",
     subtext: "#D7E3FF",
-    glow: "rgba(119, 167, 255, 0.22)",
+    glow: "rgba(119, 167, 255, 0.16)",
     badgeBg: "#213264",
     badgeText: "#F5F8FF",
-    trim: "rgba(119, 167, 255, 0.22)"
+    trim: "rgba(119, 167, 255, 0.18)"
   };
 }
 
 function createParticles(width, height, count) {
   const colors = [
-    "rgba(255,213,74,0.85)",
-    "rgba(255,255,255,0.90)",
-    "rgba(102,227,255,0.80)",
-    "rgba(255,102,194,0.70)",
-    "rgba(144,122,255,0.76)"
+    "rgba(255,213,74,0.72)",
+    "rgba(255,255,255,0.72)",
+    "rgba(102,227,255,0.62)",
+    "rgba(255,102,194,0.52)"
   ];
 
   return Array.from({ length: count }, () => ({
     x: Math.random() * width,
     y: Math.random() * height,
-    len: 8 + Math.random() * 18,
-    thickness: 1 + Math.random() * 2.2,
+    len: 7 + Math.random() * 13,
+    thickness: 1 + Math.random() * 1.6,
     angle: Math.random() * Math.PI * 2,
     color: colors[Math.floor(Math.random() * colors.length)],
-    alpha: 0.18 + Math.random() * 0.32,
-    ampX: 8 + Math.random() * 26,
-    ampY: 12 + Math.random() * 36,
+    alpha: 0.12 + Math.random() * 0.18,
+    ampX: 6 + Math.random() * 18,
+    ampY: 8 + Math.random() * 22,
     phase: Math.random() * Math.PI * 2,
-    speed: 0.7 + Math.random() * 1.1
+    speed: 0.6 + Math.random() * 0.8
   }));
 }
 
 function createEnergyOrbs(width, height, count) {
   const colors = [
-    "rgba(255,213,74,0.12)",
-    "rgba(255,95,189,0.09)",
-    "rgba(102,227,255,0.09)",
-    "rgba(147,125,255,0.10)"
+    "rgba(255,213,74,0.08)",
+    "rgba(255,95,189,0.06)",
+    "rgba(102,227,255,0.06)",
+    "rgba(147,125,255,0.07)"
   ];
 
   return Array.from({ length: count }, () => ({
     x: Math.random() * width,
     y: Math.random() * height,
-    r: 36 + Math.random() * 72,
+    r: 28 + Math.random() * 46,
     phase: Math.random() * Math.PI * 2,
-    speed: 0.35 + Math.random() * 0.7,
-    driftX: 8 + Math.random() * 26,
-    driftY: 10 + Math.random() * 32,
+    speed: 0.25 + Math.random() * 0.45,
+    driftX: 5 + Math.random() * 14,
+    driftY: 6 + Math.random() * 18,
     color: colors[Math.floor(Math.random() * colors.length)]
-  }));
-}
-
-function createSparkles(width, height, count) {
-  return Array.from({ length: count }, () => ({
-    x: Math.random() * width,
-    y: Math.random() * height,
-    size: 3 + Math.random() * 7,
-    phase: Math.random() * Math.PI * 2,
-    speed: 0.5 + Math.random() * 1.1
   }));
 }
 
@@ -261,47 +250,13 @@ function drawOrbs(ctx, orbs, phase) {
   }
 }
 
-function drawSparkle(ctx, x, y, size, alpha) {
-  ctx.save();
-  ctx.globalAlpha = alpha;
-  ctx.strokeStyle = "#FFFFFF";
-  ctx.lineWidth = 1.8;
-  ctx.lineCap = "round";
-
-  ctx.beginPath();
-  ctx.moveTo(x - size, y);
-  ctx.lineTo(x + size, y);
-  ctx.moveTo(x, y - size);
-  ctx.lineTo(x, y + size);
-  ctx.stroke();
-
-  ctx.lineWidth = 1;
-  ctx.beginPath();
-  ctx.moveTo(x - size * 0.62, y - size * 0.62);
-  ctx.lineTo(x + size * 0.62, y + size * 0.62);
-  ctx.moveTo(x + size * 0.62, y - size * 0.62);
-  ctx.lineTo(x - size * 0.62, y + size * 0.62);
-  ctx.stroke();
-
-  ctx.restore();
-}
-
-function drawSparkles(ctx, sparkles, phase) {
-  for (const s of sparkles) {
-    const alpha = 0.08 + (Math.sin(phase * s.speed + s.phase) + 1) * 0.16;
-    drawSparkle(ctx, s.x, s.y, s.size, alpha);
-  }
-}
-
 function drawSweep(ctx, width, height, phase) {
   const t = (Math.sin(phase) + 1) / 2;
-  const sweepX = -320 + t * (width + 640);
+  const sweepX = -220 + t * (width + 440);
 
-  const grad = ctx.createLinearGradient(sweepX - 180, 0, sweepX + 180, 0);
+  const grad = ctx.createLinearGradient(sweepX - 120, 0, sweepX + 120, 0);
   grad.addColorStop(0, "rgba(255,255,255,0)");
-  grad.addColorStop(0.35, "rgba(255,255,255,0.02)");
-  grad.addColorStop(0.5, "rgba(255,255,255,0.08)");
-  grad.addColorStop(0.65, "rgba(255,255,255,0.02)");
+  grad.addColorStop(0.5, "rgba(255,255,255,0.035)");
   grad.addColorStop(1, "rgba(255,255,255,0)");
 
   ctx.save();
@@ -312,66 +267,52 @@ function drawSweep(ctx, width, height, phase) {
   ctx.restore();
 }
 
-function drawSmashBallBurst(ctx, centerX, centerY, phase) {
-  const pulse = 1 + Math.sin(phase) * 0.035;
+function drawSmashBallBurst(ctx, centerX, centerY, phase, animated = false) {
+  const pulse = animated ? 1 + Math.sin(phase) * 0.02 : 1;
 
-  const halo = ctx.createRadialGradient(centerX, centerY, 24, centerX, centerY, 310 * pulse);
-  halo.addColorStop(0, "rgba(255,255,255,0.22)");
-  halo.addColorStop(0.14, "rgba(255,214,74,0.24)");
-  halo.addColorStop(0.34, "rgba(255,214,74,0.10)");
-  halo.addColorStop(0.58, "rgba(255,102,194,0.05)");
+  const halo = ctx.createRadialGradient(centerX, centerY, 24, centerX, centerY, 260 * pulse);
+  halo.addColorStop(0, "rgba(255,255,255,0.18)");
+  halo.addColorStop(0.14, "rgba(255,214,74,0.18)");
+  halo.addColorStop(0.34, "rgba(255,214,74,0.08)");
+  halo.addColorStop(0.58, "rgba(255,102,194,0.03)");
   halo.addColorStop(1, "rgba(255,255,255,0)");
   ctx.fillStyle = halo;
-  ctx.fillRect(centerX - 360, centerY - 360, 720, 720);
+  ctx.fillRect(centerX - 320, centerY - 320, 640, 640);
 
-  const rays = 18;
+  const rays = 14;
   ctx.save();
   ctx.translate(centerX, centerY);
   for (let i = 0; i < rays; i++) {
-    const angle = (Math.PI * 2 * i) / rays + phase * 0.055;
+    const angle = (Math.PI * 2 * i) / rays + (animated ? phase * 0.03 : 0);
     ctx.save();
     ctx.rotate(angle);
-    const rayGrad = ctx.createLinearGradient(0, 0, 210, 0);
-    rayGrad.addColorStop(0, "rgba(255,255,255,0.18)");
-    rayGrad.addColorStop(0.18, "rgba(255,226,130,0.18)");
+    const rayGrad = ctx.createLinearGradient(0, 0, 170, 0);
+    rayGrad.addColorStop(0, "rgba(255,255,255,0.12)");
+    rayGrad.addColorStop(0.18, "rgba(255,226,130,0.12)");
     rayGrad.addColorStop(1, "rgba(255,255,255,0)");
     ctx.fillStyle = rayGrad;
-    ctx.fillRect(28, -2.5, 210, 5);
+    ctx.fillRect(24, -2, 170, 4);
     ctx.restore();
   }
   ctx.restore();
-
-  const slashGrad = ctx.createLinearGradient(centerX - 280, centerY - 170, centerX + 280, centerY + 170);
-  slashGrad.addColorStop(0, "rgba(255,255,255,0)");
-  slashGrad.addColorStop(0.46, "rgba(255,255,255,0.04)");
-  slashGrad.addColorStop(0.5, "rgba(255,255,255,0.13)");
-  slashGrad.addColorStop(0.54, "rgba(255,255,255,0.04)");
-  slashGrad.addColorStop(1, "rgba(255,255,255,0)");
-  ctx.fillStyle = slashGrad;
-  ctx.save();
-  ctx.translate(centerX, centerY);
-  ctx.rotate(-0.3);
-  ctx.fillRect(-350, -10, 700, 20);
-  ctx.restore();
 }
 
-function drawBackgroundGrid(ctx, width, height, phase) {
+function drawBackgroundGrid(ctx, width, height) {
   ctx.save();
-  ctx.globalAlpha = 0.08;
+  ctx.globalAlpha = 0.045;
   ctx.strokeStyle = "#AFC4FF";
   ctx.lineWidth = 1;
 
-  const offset = (phase / (Math.PI * 2)) * 40;
-  const gap = 40;
+  const gap = 48;
 
-  for (let x = -gap + offset; x < width + gap; x += gap) {
+  for (let x = 0; x < width; x += gap) {
     ctx.beginPath();
     ctx.moveTo(x, 0);
     ctx.lineTo(x, height);
     ctx.stroke();
   }
 
-  for (let y = -gap + offset; y < height + gap; y += gap) {
+  for (let y = 0; y < height; y += gap) {
     ctx.beginPath();
     ctx.moveTo(0, y);
     ctx.lineTo(width, y);
@@ -381,7 +322,14 @@ function drawBackgroundGrid(ctx, width, height, phase) {
   ctx.restore();
 }
 
-function drawBackground(ctx, width, height, particles = null, orbs = null, sparkles = null, phase = 0) {
+function drawBackground(ctx, width, height, options = {}) {
+  const {
+    particles = null,
+    orbs = null,
+    phase = 0,
+    animated = false
+  } = options;
+
   const bg = ctx.createLinearGradient(0, 0, width, height);
   bg.addColorStop(0, "#040713");
   bg.addColorStop(0.28, "#0B1231");
@@ -391,55 +339,52 @@ function drawBackground(ctx, width, height, particles = null, orbs = null, spark
   ctx.fillStyle = bg;
   ctx.fillRect(0, 0, width, height);
 
-  const topGlow = ctx.createRadialGradient(width / 2, 120, 30, width / 2, 120, 420);
-  topGlow.addColorStop(0, "rgba(255,213,74,0.16)");
-  topGlow.addColorStop(0.32, "rgba(255,213,74,0.07)");
+  const topGlow = ctx.createRadialGradient(width / 2, 120, 30, width / 2, 120, 360);
+  topGlow.addColorStop(0, "rgba(255,213,74,0.12)");
+  topGlow.addColorStop(0.32, "rgba(255,213,74,0.05)");
   topGlow.addColorStop(1, "rgba(255,213,74,0)");
   ctx.fillStyle = topGlow;
   ctx.fillRect(0, 0, width, height);
 
-  const leftGlow = ctx.createRadialGradient(130, 220, 10, 130, 220, 360);
-  leftGlow.addColorStop(0, "rgba(255,90,189,0.12)");
+  const leftGlow = ctx.createRadialGradient(120, 220, 10, 120, 220, 300);
+  leftGlow.addColorStop(0, "rgba(255,90,189,0.08)");
   leftGlow.addColorStop(1, "rgba(255,90,189,0)");
   ctx.fillStyle = leftGlow;
   ctx.fillRect(0, 0, width, height);
 
-  const rightGlow = ctx.createRadialGradient(width - 140, 190, 10, width - 140, 190, 380);
-  rightGlow.addColorStop(0, "rgba(102,227,255,0.12)");
+  const rightGlow = ctx.createRadialGradient(width - 120, 190, 10, width - 120, 190, 320);
+  rightGlow.addColorStop(0, "rgba(102,227,255,0.08)");
   rightGlow.addColorStop(1, "rgba(102,227,255,0)");
   ctx.fillStyle = rightGlow;
   ctx.fillRect(0, 0, width, height);
 
-  drawBackgroundGrid(ctx, width, height, phase);
-  drawSmashBallBurst(ctx, width / 2, 150, phase);
+  drawBackgroundGrid(ctx, width, height);
+  drawSmashBallBurst(ctx, width / 2, 150, phase, animated);
 
   if (orbs) drawOrbs(ctx, orbs, phase);
-  if (sparkles) drawSparkles(ctx, sparkles, phase);
   if (particles) drawParticles(ctx, particles, phase);
-  drawSweep(ctx, width, height, phase);
+  if (animated) drawSweep(ctx, width, height, phase);
 }
 
 function drawHeaderShimmer(ctx, x, y, width, height, phase) {
-  const t = (Math.sin(phase * 1.1) + 1) / 2;
-  const shimmerX = x - 180 + t * (width + 360);
+  const t = (Math.sin(phase) + 1) / 2;
+  const shimmerX = x - 140 + t * (width + 280);
 
   ctx.save();
   drawRoundedRect(ctx, x, y, width, height, 30);
   ctx.clip();
 
-  const grad = ctx.createLinearGradient(shimmerX - 220, 0, shimmerX + 220, 0);
+  const grad = ctx.createLinearGradient(shimmerX - 180, 0, shimmerX + 180, 0);
   grad.addColorStop(0, "rgba(255,255,255,0)");
-  grad.addColorStop(0.35, "rgba(255,255,255,0.04)");
-  grad.addColorStop(0.5, "rgba(255,255,255,0.16)");
-  grad.addColorStop(0.65, "rgba(255,255,255,0.04)");
+  grad.addColorStop(0.5, "rgba(255,255,255,0.09)");
   grad.addColorStop(1, "rgba(255,255,255,0)");
   ctx.fillStyle = grad;
-  ctx.fillRect(shimmerX - 240, y, 480, height);
+  ctx.fillRect(shimmerX - 200, y, 400, height);
 
   ctx.restore();
 }
 
-function drawHeader(ctx, width, phase, totalPlayers) {
+function drawHeader(ctx, width, phase, totalPlayers, animated = false) {
   const x = 24;
   const y = 18;
   const w = width - 48;
@@ -454,27 +399,29 @@ function drawHeader(ctx, width, phase, totalPlayers) {
   ctx.fillStyle = headerGrad;
   ctx.fill();
 
-  ctx.strokeStyle = "rgba(255,255,255,0.12)";
+  ctx.strokeStyle = "rgba(255,255,255,0.10)";
   ctx.lineWidth = 2;
   ctx.stroke();
 
-  drawHeaderShimmer(ctx, x, y, w, h, phase);
+  if (animated) {
+    drawHeaderShimmer(ctx, x, y, w, h, phase);
+  }
 
   ctx.fillStyle = "#F8FBFF";
-  ctx.font = "bold 42px SmashFont";
+  ctx.font = "bold 40px SmashFont";
   ctx.fillText("SSBU LEADERBOARD", x + 28, y + 50);
 
   ctx.fillStyle = "#D8E2FF";
-  ctx.font = "20px SmashFont";
+  ctx.font = "19px SmashFont";
   ctx.fillText("Official Ranked Order", x + 28, y + 78);
 
-  const pillW = 124;
+  const pillW = 128;
   const pillH = 36;
   const pillX = x + w - pillW - 22;
   const pillY = y + 24;
 
   drawRoundedRect(ctx, pillX, pillY, pillW, pillH, 18);
-  ctx.fillStyle = "rgba(255,255,255,0.14)";
+  ctx.fillStyle = "rgba(255,255,255,0.12)";
   ctx.fill();
 
   ctx.fillStyle = "#FFFFFF";
@@ -501,80 +448,80 @@ function drawRankBadge(ctx, x, y, place, colors) {
 
 function drawRecordPill(ctx, x, y, w, h, label, value, accentColor) {
   drawRoundedRect(ctx, x, y, w, h, 18);
-  ctx.fillStyle = "rgba(255,255,255,0.09)";
+  ctx.fillStyle = "rgba(255,255,255,0.08)";
   ctx.fill();
 
-  ctx.strokeStyle = "rgba(255,255,255,0.08)";
+  ctx.strokeStyle = "rgba(255,255,255,0.06)";
   ctx.lineWidth = 1;
   ctx.stroke();
 
   ctx.fillStyle = accentColor;
-  ctx.font = "bold 15px SmashFont";
-  ctx.fillText(label, x + 14, y + 19);
+  ctx.font = "bold 14px SmashFont";
+  ctx.fillText(label, x + 14, y + 18);
 
   ctx.fillStyle = "#FFFFFF";
-  ctx.font = "bold 22px SmashFont";
+  ctx.font = "bold 21px SmashFont";
   const tw = ctx.measureText(value).width;
-  ctx.fillText(value, x + w - tw - 14, y + 30);
+  ctx.fillText(value, x + w - tw - 14, y + 29);
 }
 
 function drawCardSheen(ctx, x, y, w, h, phase, strength = 1) {
   const t = (Math.sin(phase) + 1) / 2;
-  const sweepX = x - 80 + t * (w + 160);
+  const sweepX = x - 70 + t * (w + 140);
 
   ctx.save();
   drawRoundedRect(ctx, x, y, w, h, 26);
   ctx.clip();
 
-  const grad = ctx.createLinearGradient(sweepX - 90, 0, sweepX + 90, 0);
+  const grad = ctx.createLinearGradient(sweepX - 80, 0, sweepX + 80, 0);
   grad.addColorStop(0, "rgba(255,255,255,0)");
-  grad.addColorStop(0.45, `rgba(255,255,255,${0.03 * strength})`);
-  grad.addColorStop(0.5, `rgba(255,255,255,${0.12 * strength})`);
-  grad.addColorStop(0.55, `rgba(255,255,255,${0.03 * strength})`);
+  grad.addColorStop(0.5, `rgba(255,255,255,${0.07 * strength})`);
   grad.addColorStop(1, "rgba(255,255,255,0)");
 
   ctx.fillStyle = grad;
-  ctx.fillRect(sweepX - 110, y, 220, h);
+  ctx.fillRect(sweepX - 90, y, 180, h);
   ctx.restore();
 }
 
-function drawAvatarRing(ctx, cx, cy, r, colors, phase, champion = false) {
-  const pulse = champion ? 1 + Math.sin(phase) * 0.03 : 1 + Math.sin(phase) * 0.015;
-  const ringR = r + (champion ? 9 : 6) * pulse;
+function drawAvatarRing(ctx, cx, cy, r, colors, phase, champion = false, animated = false) {
+  const pulse = animated
+    ? (champion ? 1 + Math.sin(phase) * 0.02 : 1 + Math.sin(phase) * 0.01)
+    : 1;
 
-  const ring = ctx.createRadialGradient(cx, cy, ringR - 4, cx, cy, ringR + 14);
+  const ringR = r + (champion ? 8 : 5) * pulse;
+
+  const ring = ctx.createRadialGradient(cx, cy, ringR - 4, cx, cy, ringR + 10);
   ring.addColorStop(0, colors.glow);
   ring.addColorStop(1, "rgba(255,255,255,0)");
   ctx.fillStyle = ring;
   ctx.beginPath();
-  ctx.arc(cx, cy, ringR + 14, 0, Math.PI * 2);
+  ctx.arc(cx, cy, ringR + 10, 0, Math.PI * 2);
   ctx.fill();
 
   ctx.beginPath();
   ctx.arc(cx, cy, ringR, 0, Math.PI * 2);
   ctx.strokeStyle = colors.accent;
-  ctx.lineWidth = champion ? 5 : 4;
+  ctx.lineWidth = champion ? 4 : 3;
   ctx.stroke();
 
   ctx.beginPath();
   ctx.arc(cx, cy, r + 2, 0, Math.PI * 2);
-  ctx.strokeStyle = "rgba(255,255,255,0.50)";
+  ctx.strokeStyle = "rgba(255,255,255,0.42)";
   ctx.lineWidth = 2;
   ctx.stroke();
 }
 
-function drawTopPlayerCard(ctx, entry, x, y, w, h, phase, isChampion = false) {
+function drawTopPlayerCard(ctx, entry, x, y, w, h, phase, options = {}) {
+  const { isChampion = false, animated = false } = options;
   const colors = getPlacementColors(entry.place);
-  const avatarSize = isChampion ? 146 : 106;
+  const avatarSize = isChampion ? 132 : 96;
   const avatarRadius = avatarSize / 2;
-  const bob = isChampion ? Math.sin(phase) * 6 : Math.sin(phase + entry.place * 0.4) * 3.5;
-  const pulse = isChampion
-    ? 20 + (Math.sin(phase) + 1) * 8
-    : 11 + (Math.sin(phase + entry.place) + 1) * 3;
+  const bob = animated ? (isChampion ? Math.sin(phase) * 4 : Math.sin(phase + entry.place * 0.4) * 2.2) : 0;
+  const shadowBlur = isChampion ? 14 : 8;
 
   ctx.save();
   ctx.shadowColor = colors.glow;
-  ctx.shadowBlur = pulse;
+  ctx.shadowBlur = shadowBlur;
   drawRoundedRect(ctx, x, y, w, h, 28);
   ctx.fillStyle = createVerticalGradient(ctx, x, y, h, [
     [0, colors.panelTop],
@@ -594,7 +541,9 @@ function drawTopPlayerCard(ctx, entry, x, y, w, h, phase, isChampion = false) {
   ctx.lineWidth = 2;
   ctx.stroke();
 
-  drawCardSheen(ctx, x, y, w, h, phase + entry.place * 0.4, isChampion ? 1.1 : 0.8);
+  if (animated) {
+    drawCardSheen(ctx, x, y, w, h, phase + entry.place * 0.35, isChampion ? 1 : 0.7);
+  }
 
   drawRoundedRect(ctx, x, y, 10, h, 5);
   ctx.fillStyle = colors.accent;
@@ -603,9 +552,9 @@ function drawTopPlayerCard(ctx, entry, x, y, w, h, phase, isChampion = false) {
   drawRankBadge(ctx, x + 18, y + 18, entry.place, colors);
 
   if (isChampion) {
-    const champX = x + w - 142;
+    const champX = x + w - 136;
     const champY = y + 18;
-    drawRoundedRect(ctx, champX, champY, 122, 30, 13);
+    drawRoundedRect(ctx, champX, champY, 116, 30, 13);
     ctx.fillStyle = "#FFD54A";
     ctx.fill();
 
@@ -613,7 +562,7 @@ function drawTopPlayerCard(ctx, entry, x, y, w, h, phase, isChampion = false) {
     ctx.font = "bold 14px SmashFont";
     const txt = "CHAMPION";
     const tw = ctx.measureText(txt).width;
-    ctx.fillText(txt, champX + (122 - tw) / 2, champY + 20);
+    ctx.fillText(txt, champX + (116 - tw) / 2, champY + 20);
   }
 
   const avatarX = x + (w - avatarSize) / 2;
@@ -621,7 +570,7 @@ function drawTopPlayerCard(ctx, entry, x, y, w, h, phase, isChampion = false) {
   const avatarCX = avatarX + avatarRadius;
   const avatarCY = avatarY + avatarRadius;
 
-  drawAvatarRing(ctx, avatarCX, avatarCY, avatarRadius, colors, phase, isChampion);
+  drawAvatarRing(ctx, avatarCX, avatarCY, avatarRadius, colors, phase, isChampion, animated);
 
   if (entry.avatarImage) {
     drawCircleImage(ctx, entry.avatarImage, avatarX, avatarY, avatarSize);
@@ -632,43 +581,42 @@ function drawTopPlayerCard(ctx, entry, x, y, w, h, phase, isChampion = false) {
     ctx.fill();
 
     ctx.fillStyle = "#F6FAFF";
-    ctx.font = `bold ${isChampion ? 46 : 36}px SmashFont`;
+    ctx.font = `bold ${isChampion ? 42 : 32}px SmashFont`;
     const initial = entry.canvasDisplayName.slice(0, 1).toUpperCase();
     const tw = ctx.measureText(initial).width;
-    ctx.fillText(initial, avatarCX - tw / 2, avatarCY + 15);
+    ctx.fillText(initial, avatarCX - tw / 2, avatarCY + 14);
   }
 
   ctx.fillStyle = colors.text;
-  ctx.font = isChampion ? "bold 34px SmashFont" : "bold 28px SmashFont";
+  ctx.font = isChampion ? "bold 31px SmashFont" : "bold 26px SmashFont";
   const name = truncateText(ctx, entry.canvasDisplayName, w - 42);
   const nameW = ctx.measureText(name).width;
-  ctx.fillText(name, x + (w - nameW) / 2, y + h - 100);
+  ctx.fillText(name, x + (w - nameW) / 2, y + h - 98);
 
   ctx.fillStyle = colors.subtext;
-  ctx.font = "23px SmashFont";
+  ctx.font = "22px SmashFont";
   const rankText = `Rank #${entry.rank}`;
   const rankW = ctx.measureText(rankText).width;
   ctx.fillText(rankText, x + (w - rankW) / 2, y + h - 62);
 
-  const pillW = isChampion ? 198 : 178;
+  const pillW = isChampion ? 190 : 170;
   const pillH = 42;
   const pillX = x + (w - pillW) / 2;
   const pillY = y + h - 38;
   drawRecordPill(ctx, pillX, pillY, pillW, pillH, "SET RECORD", `${entry.setWins}-${entry.setLosses}`, colors.accentSoft);
 }
 
-function drawLowerCard(ctx, entry, x, y, w, h, phase) {
+function drawLowerCard(ctx, entry, x, y, w, h, phase, animated = false) {
   const colors = getPlacementColors(entry.place);
-  const pulse = 8 + (Math.sin(phase + entry.place * 0.4) + 1) * 2.4;
-  const avatarSize = 68;
-  const avatarX = x + 114;
+  const avatarSize = 62;
+  const avatarX = x + 108;
   const avatarY = y + (h - avatarSize) / 2;
   const avatarCX = avatarX + avatarSize / 2;
   const avatarCY = avatarY + avatarSize / 2;
 
   ctx.save();
   ctx.shadowColor = colors.glow;
-  ctx.shadowBlur = pulse;
+  ctx.shadowBlur = 6;
   drawRoundedRect(ctx, x, y, w, h, 22);
   ctx.fillStyle = createVerticalGradient(ctx, x, y, h, [
     [0, colors.panelTop],
@@ -688,7 +636,9 @@ function drawLowerCard(ctx, entry, x, y, w, h, phase) {
   ctx.lineWidth = 1.5;
   ctx.stroke();
 
-  drawCardSheen(ctx, x, y, w, h, phase + entry.place * 0.25, 0.7);
+  if (animated) {
+    drawCardSheen(ctx, x, y, w, h, phase + entry.place * 0.2, 0.45);
+  }
 
   drawRoundedRect(ctx, x, y, 8, h, 5);
   ctx.fillStyle = colors.accent;
@@ -696,7 +646,7 @@ function drawLowerCard(ctx, entry, x, y, w, h, phase) {
 
   drawRankBadge(ctx, x + 18, y + 18, entry.place, colors);
 
-  drawAvatarRing(ctx, avatarCX, avatarCY, avatarSize / 2, colors, phase + entry.place * 0.2, false);
+  drawAvatarRing(ctx, avatarCX, avatarCY, avatarSize / 2, colors, phase + entry.place * 0.2, false, animated);
 
   if (entry.avatarImage) {
     drawCircleImage(ctx, entry.avatarImage, avatarX, avatarY, avatarSize);
@@ -707,126 +657,149 @@ function drawLowerCard(ctx, entry, x, y, w, h, phase) {
     ctx.fill();
 
     ctx.fillStyle = "#F6FAFF";
-    ctx.font = "bold 27px SmashFont";
+    ctx.font = "bold 24px SmashFont";
     const initial = entry.canvasDisplayName.slice(0, 1).toUpperCase();
     const tw = ctx.measureText(initial).width;
-    ctx.fillText(initial, avatarCX - tw / 2, avatarCY + 10);
+    ctx.fillText(initial, avatarCX - tw / 2, avatarCY + 9);
   }
 
-  const textX = avatarX + avatarSize + 20;
+  const textX = avatarX + avatarSize + 18;
   ctx.fillStyle = colors.text;
-  ctx.font = "bold 28px SmashFont";
-  const name = truncateText(ctx, entry.canvasDisplayName, 410);
-  ctx.fillText(name, textX, y + 43);
+  ctx.font = "bold 25px SmashFont";
+  const name = truncateText(ctx, entry.canvasDisplayName, 350);
+  ctx.fillText(name, textX, y + 42);
 
   ctx.fillStyle = colors.subtext;
-  ctx.font = "22px SmashFont";
-  ctx.fillText(`Rank #${entry.rank}`, textX, y + 75);
+  ctx.font = "21px SmashFont";
+  ctx.fillText(`Rank #${entry.rank}`, textX, y + 73);
 
-  const recordW = 198;
-  const recordH = 42;
-  const recordX = x + w - recordW - 22;
-  const recordY = y + 18;
+  const recordW = 188;
+  const recordH = 40;
+  const recordX = x + w - recordW - 20;
+  const recordY = y + 19;
   drawRecordPill(ctx, recordX, recordY, recordW, recordH, "SET RECORD", `${entry.setWins}-${entry.setLosses}`, colors.accentSoft);
 }
 
-function drawTopSection(ctx, entries, width, phase) {
+function drawTopSection(ctx, entries, width, phase, animated = false) {
   const topThree = entries.slice(0, 3);
   const first = topThree.find((e) => e.place === 1);
   const second = topThree.find((e) => e.place === 2);
   const third = topThree.find((e) => e.place === 3);
 
   const topY = 152;
-  const centerW = 378;
-  const centerH = 352;
-  const sideW = 292;
-  const sideH = 292;
-  const gap = 26;
+  const centerW = 330;
+  const centerH = 330;
+  const sideW = 252;
+  const sideH = 272;
+  const gap = 22;
 
   const centerX = (width - centerW) / 2;
   const leftX = centerX - sideW - gap;
   const rightX = centerX + centerW + gap;
   const sideY = topY + 34;
 
-  if (second) drawTopPlayerCard(ctx, second, leftX, sideY, sideW, sideH, phase, false);
-  if (first) drawTopPlayerCard(ctx, first, centerX, topY, centerW, centerH, phase, true);
-  if (third) drawTopPlayerCard(ctx, third, rightX, sideY, sideW, sideH, phase, false);
-}
+  if (second) {
+    drawTopPlayerCard(ctx, second, leftX, sideY, sideW, sideH, phase, {
+      isChampion: false,
+      animated
+    });
+  }
 
-function drawLowerSection(ctx, entries, width, phase) {
-  const rest = entries.slice(3);
-  if (rest.length === 0) return;
+  if (first) {
+    drawTopPlayerCard(ctx, first, centerX, topY, centerW, centerH, phase, {
+      isChampion: true,
+      animated
+    });
+  }
 
-  const startY = 538;
-  const cardH = 102;
-  const gap = 16;
-  const x = 32;
-  const w = width - 64;
-
-  for (let i = 0; i < rest.length; i++) {
-    const y = startY + i * (cardH + gap);
-    drawLowerCard(ctx, rest[i], x, y, w, cardH, phase);
+  if (third) {
+    drawTopPlayerCard(ctx, third, rightX, sideY, sideW, sideH, phase, {
+      isChampion: false,
+      animated
+    });
   }
 }
 
-function drawLeaderboardFrame(
-  ctx,
-  entries,
-  width,
-  height,
-  particles = null,
-  orbs = null,
-  sparkles = null,
-  phase = 0
-) {
-  drawBackground(ctx, width, height, particles, orbs, sparkles, phase);
-  drawHeader(ctx, width, phase, entries.length);
-  drawTopSection(ctx, entries, width, phase);
-  drawLowerSection(ctx, entries, width, phase);
+function drawLowerSection(ctx, entries, width, phase, animated = false) {
+  const rest = entries.slice(3);
+  if (rest.length === 0) return;
+
+  const startY = 510;
+  const cardH = 96;
+  const gap = 14;
+  const x = 28;
+  const w = width - 56;
+
+  for (let i = 0; i < rest.length; i++) {
+    const y = startY + i * (cardH + gap);
+    drawLowerCard(ctx, rest[i], x, y, w, cardH, phase, animated);
+  }
+}
+
+function drawLeaderboardFrame(ctx, entries, width, height, options = {}) {
+  const { phase = 0, animated = false, particles = null, orbs = null } = options;
+
+  drawBackground(ctx, width, height, {
+    phase,
+    animated,
+    particles,
+    orbs
+  });
+
+  drawHeader(ctx, width, phase, entries.length, animated);
+  drawTopSection(ctx, entries, width, phase, animated);
+  drawLowerSection(ctx, entries, width, phase, animated);
 }
 
 function getLeaderboardHeight(entryCount) {
-  if (entryCount <= 3) return 900;
-  return 538 + (entryCount - 3) * 118 + 120;
+  if (entryCount <= 3) return 860;
+  return 510 + (entryCount - 3) * 110 + 110;
 }
 
 async function generateLeaderboardImage(rows, guild) {
   const entries = await buildLeaderboardEntries(guild, rows);
-  const width = 1280;
+  const width = 1200;
   const height = getLeaderboardHeight(entries.length);
 
   const canvas = createCanvas(width, height);
   const ctx = canvas.getContext("2d");
 
-  drawLeaderboardFrame(ctx, entries, width, height);
+  drawLeaderboardFrame(ctx, entries, width, height, {
+    animated: false,
+    phase: 0
+  });
 
   return canvas.toBuffer("image/png");
 }
 
 async function generateAnimatedLeaderboardGif(rows, guild) {
   const entries = await buildLeaderboardEntries(guild, rows);
-  const width = 1280;
+  const width = 1100;
   const height = getLeaderboardHeight(entries.length);
 
   const encoder = new GIFEncoder(width, height);
   encoder.start();
   encoder.setRepeat(0);
-  encoder.setDelay(55);
-  encoder.setQuality(9);
+  encoder.setDelay(75);
+  encoder.setQuality(12);
 
   const canvas = createCanvas(width, height);
   const ctx = canvas.getContext("2d");
 
-  const particles = createParticles(width, height, 130);
-  const orbs = createEnergyOrbs(width, height, 18);
-  const sparkles = createSparkles(width, height, 24);
+  const particles = createParticles(width, height, 42);
+  const orbs = createEnergyOrbs(width, height, 8);
 
-  const frameCount = 48;
+  const frameCount = 24;
 
   for (let frame = 0; frame < frameCount; frame++) {
     const phase = (frame / frameCount) * Math.PI * 2;
     ctx.clearRect(0, 0, width, height);
-    drawLeaderboardFrame(ctx, entries, width, height, particles, orbs, sparkles, phase);
+    drawLeaderboardFrame(ctx, entries, width, height, {
+      animated: true,
+      phase,
+      particles,
+      orbs
+    });
     encoder.addFrame(ctx);
   }
 
