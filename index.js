@@ -128,42 +128,42 @@ function sanitizeDisplayNameForCanvas(name) {
 function getPlacementColors(place) {
   if (place === 1) {
     return {
-      bg: "#4D3300",
-      accent: "#FFD447",
-      text: "#FFF4C2",
-      glow: "rgba(255, 212, 71, 0.46)",
+      bg: "#1C1200",
+      accent: "#FFD84D",
+      text: "#FFF8D8",
+      glow: "rgba(255, 216, 77, 0.62)",
       pillBg: "#FFE27D",
-      pillText: "#3D2600"
+      pillText: "#2A1800"
     };
   }
   if (place === 2) {
     return {
-      bg: "#24355C",
-      accent: "#D8E3FF",
-      text: "#EEF5FF",
-      glow: "rgba(216, 227, 255, 0.28)",
+      bg: "#101A39",
+      accent: "#E4ECFF",
+      text: "#F4F8FF",
+      glow: "rgba(228, 236, 255, 0.32)",
       pillBg: "#EEF3FF",
-      pillText: "#22304A"
+      pillText: "#1A2745"
     };
   }
   if (place === 3) {
     return {
-      bg: "#5A3426",
-      accent: "#F5B38A",
-      text: "#FFE7D8",
-      glow: "rgba(245, 179, 138, 0.30)",
-      pillBg: "#FFD4B9",
-      pillText: "#472719"
+      bg: "#31140E",
+      accent: "#FFBE94",
+      text: "#FFEADF",
+      glow: "rgba(255, 190, 148, 0.36)",
+      pillBg: "#FFD7BF",
+      pillText: "#472012"
     };
   }
 
   return {
-    bg: "#221E46",
-    accent: "#7A8CFF",
-    text: "#EEF2FF",
-    glow: "rgba(122, 140, 255, 0.18)",
-    pillBg: "#313878",
-    pillText: "#EEF2FF"
+    bg: "#0F1430",
+    accent: "#79A2FF",
+    text: "#F1F5FF",
+    glow: "rgba(121, 162, 255, 0.22)",
+    pillBg: "#25305F",
+    pillText: "#F1F5FF"
   };
 }
 
@@ -189,51 +189,45 @@ async function buildLeaderboardEntries(guild, rows) {
         rank: row.rank,
         setWins: row.setWins,
         setLosses: row.setLosses,
-        setsPlayed: row.setsPlayed,
         avatarImage
       };
     })
   );
 }
 
-function createParticles(width, height, count, layer = "front") {
-  const colors = [
-    "#7A8CFF",
-    "#58E1FF",
-    "#C767FF",
-    "#FF5AB8",
-    "#FFD447",
-    "#FFFFFF"
-  ];
-
-  const front = layer === "front";
+function createParticles(width, height, count) {
+  const colors = ["#FFD84D", "#FFFFFF", "#63E3FF", "#FF4FB8", "#8F7BFF"];
   return Array.from({ length: count }, () => ({
     x: Math.random() * width,
     y: Math.random() * height,
-    len: front ? 8 + Math.random() * 14 : 5 + Math.random() * 9,
-    thickness: front ? 2 + Math.random() * 2.6 : 1.2 + Math.random() * 1.4,
+    len: 6 + Math.random() * 14,
+    thickness: 1.2 + Math.random() * 2.3,
     angle: Math.random() * Math.PI,
-    speed: front ? 1.5 + Math.random() * 2.8 : 0.7 + Math.random() * 1.5,
-    drift: front ? -1.8 + Math.random() * 3.6 : -0.8 + Math.random() * 1.6,
     color: colors[Math.floor(Math.random() * colors.length)],
-    alpha: front ? 0.95 : 0.5
+    alpha: 0.4 + Math.random() * 0.5,
+    ampX: 10 + Math.random() * 30,
+    ampY: 18 + Math.random() * 45,
+    phase: Math.random() * Math.PI * 2,
+    speed: 0.7 + Math.random() * 1.4
   }));
 }
 
 function createEnergyOrbs(width, height, count) {
   const colors = [
-    "rgba(88,225,255,0.14)",
-    "rgba(199,103,255,0.14)",
-    "rgba(122,140,255,0.16)",
-    "rgba(255,90,184,0.10)"
+    "rgba(255,216,77,0.16)",
+    "rgba(255,79,184,0.12)",
+    "rgba(99,227,255,0.12)",
+    "rgba(143,123,255,0.14)"
   ];
 
   return Array.from({ length: count }, () => ({
     x: Math.random() * width,
     y: Math.random() * height,
-    r: 20 + Math.random() * 46,
-    speed: 0.25 + Math.random() * 0.75,
-    drift: -0.8 + Math.random() * 1.6,
+    r: 22 + Math.random() * 55,
+    phase: Math.random() * Math.PI * 2,
+    speed: 0.5 + Math.random() * 1.2,
+    driftX: 8 + Math.random() * 22,
+    driftY: 10 + Math.random() * 28,
     color: colors[Math.floor(Math.random() * colors.length)]
   }));
 }
@@ -243,57 +237,15 @@ function createSparkles(width, height, count) {
     x: Math.random() * width,
     y: Math.random() * height,
     size: 4 + Math.random() * 8,
-    phase: Math.random() * Math.PI * 2
+    phase: Math.random() * Math.PI * 2,
+    speed: 0.6 + Math.random() * 1.5
   }));
 }
 
-function createBurstParticles(width, countPerSide = 75) {
-  const colors = [
-    "#58E1FF",
-    "#C767FF",
-    "#FF5AB8",
-    "#FFD447",
-    "#FFFFFF"
-  ];
-
-  const particles = [];
-
-  function makeParticle(side) {
-    const left = side === "left";
-    const originX = left ? 50 : width - 50;
-    const originY = 96 + Math.random() * 28;
-
-    const angleBase = left ? -0.42 : Math.PI + 0.42;
-    const spread = 1.0;
-    const angle = angleBase + (Math.random() - 0.5) * spread;
-
-    return {
-      originX,
-      originY,
-      angle,
-      speed: 7 + Math.random() * 10,
-      gravity: 0.2 + Math.random() * 0.16,
-      size: 5 + Math.random() * 9,
-      rot: Math.random() * Math.PI,
-      rotSpeed: -0.2 + Math.random() * 0.4,
-      color: colors[Math.floor(Math.random() * colors.length)],
-      alpha: 0.72 + Math.random() * 0.2,
-      shape: Math.random() > 0.5 ? "rect" : "circle"
-    };
-  }
-
-  for (let i = 0; i < countPerSide; i++) {
-    particles.push(makeParticle("left"));
-    particles.push(makeParticle("right"));
-  }
-
-  return particles;
-}
-
-function drawParticles(ctx, particles, frame, width, height) {
+function drawParticles(ctx, particles, phase) {
   for (const p of particles) {
-    const y = (p.y + frame * p.speed * 6) % (height + 40) - 20;
-    const x = (p.x + frame * p.drift * 2 + width) % width;
+    const x = p.x + Math.sin(phase * p.speed + p.phase) * p.ampX;
+    const y = p.y + Math.cos(phase * p.speed + p.phase) * p.ampY;
     const dx = Math.cos(p.angle) * p.len;
     const dy = Math.sin(p.angle) * p.len;
 
@@ -310,10 +262,10 @@ function drawParticles(ctx, particles, frame, width, height) {
   }
 }
 
-function drawOrbs(ctx, orbs, frame, width, height) {
+function drawOrbs(ctx, orbs, phase) {
   for (const o of orbs) {
-    const y = (o.y + frame * o.speed * 2) % (height + o.r * 2) - o.r;
-    const x = (o.x + frame * o.drift + width) % width;
+    const x = o.x + Math.sin(phase * o.speed + o.phase) * o.driftX;
+    const y = o.y + Math.cos(phase * o.speed + o.phase) * o.driftY;
 
     ctx.beginPath();
     ctx.arc(x, y, o.r, 0, Math.PI * 2);
@@ -346,97 +298,92 @@ function drawSparkle(ctx, x, y, size, alpha) {
   ctx.restore();
 }
 
-function drawSparkles(ctx, sparkles, frame) {
+function drawSparkles(ctx, sparkles, phase) {
   for (const s of sparkles) {
-    const alpha = 0.16 + (Math.sin(frame * 0.55 + s.phase) + 1) * 0.22;
+    const alpha = 0.1 + (Math.sin(phase * s.speed + s.phase) + 1) * 0.18;
     drawSparkle(ctx, s.x, s.y, s.size, alpha);
   }
 }
 
-function drawBurstParticles(ctx, particles, frame) {
-  const t = frame * 1.12;
+function drawSmashGlow(ctx, width, phase) {
+  const centerX = width / 2;
+  const centerY = 145;
+  const pulse = 1 + Math.sin(phase) * 0.04;
 
-  for (const p of particles) {
-    const x = p.originX + Math.cos(p.angle) * p.speed * t;
-    const y = p.originY + Math.sin(p.angle) * p.speed * t + p.gravity * t * t;
+  const halo = ctx.createRadialGradient(centerX, centerY, 15, centerX, centerY, 290 * pulse);
+  halo.addColorStop(0, "rgba(255,255,255,0.24)");
+  halo.addColorStop(0.18, "rgba(255,224,102,0.22)");
+  halo.addColorStop(0.42, "rgba(255,224,102,0.12)");
+  halo.addColorStop(0.72, "rgba(255,79,184,0.05)");
+  halo.addColorStop(1, "rgba(255,255,255,0)");
+  ctx.fillStyle = halo;
+  ctx.fillRect(0, 0, width, 360);
 
-    const life = Math.max(0, 1 - frame / 22);
-    if (life <= 0) continue;
-
-    ctx.save();
-    ctx.globalAlpha = p.alpha * life;
-    ctx.translate(x, y);
-    ctx.rotate(p.rot + frame * p.rotSpeed);
-    ctx.fillStyle = p.color;
-
-    if (p.shape === "rect") {
-      drawRoundedRect(ctx, -p.size / 2, -p.size / 3, p.size, p.size * 0.66, 2);
-      ctx.fill();
-    } else {
-      ctx.beginPath();
-      ctx.arc(0, 0, p.size * 0.38, 0, Math.PI * 2);
-      ctx.fill();
-    }
-
-    ctx.restore();
-  }
+  ctx.save();
+  ctx.translate(centerX, centerY);
+  ctx.rotate(-0.28);
+  const beam = ctx.createLinearGradient(-340, 0, 340, 0);
+  beam.addColorStop(0, "rgba(255,255,255,0)");
+  beam.addColorStop(0.44, "rgba(255,255,255,0.05)");
+  beam.addColorStop(0.5, "rgba(255,255,255,0.16)");
+  beam.addColorStop(0.56, "rgba(255,255,255,0.05)");
+  beam.addColorStop(1, "rgba(255,255,255,0)");
+  ctx.fillStyle = beam;
+  ctx.fillRect(-380, -16, 760, 32);
+  ctx.restore();
 }
 
-function drawBackground(ctx, width, height, backParticles = null, frontParticles = null, orbs = null, sparkles = null, burstParticles = null, frame = 0) {
+function drawBackground(ctx, width, height, particles = null, orbs = null, sparkles = null, phase = 0) {
   const bg = ctx.createLinearGradient(0, 0, width, height);
-  bg.addColorStop(0, "#060916");
-  bg.addColorStop(0.45, "#0A102A");
-  bg.addColorStop(1, "#140B2A");
+  bg.addColorStop(0, "#02040D");
+  bg.addColorStop(0.4, "#0A1030");
+  bg.addColorStop(0.72, "#160B2B");
+  bg.addColorStop(1, "#05070F");
   ctx.fillStyle = bg;
   ctx.fillRect(0, 0, width, height);
 
-  const topGlow = ctx.createLinearGradient(0, 0, 0, 220);
-  topGlow.addColorStop(0, "rgba(88,225,255,0.16)");
-  topGlow.addColorStop(1, "rgba(88,225,255,0)");
-  ctx.fillStyle = topGlow;
-  ctx.fillRect(0, 0, width, 220);
-
-  const leftBeam = ctx.createRadialGradient(180, 100, 20, 180, 100, 420);
-  leftBeam.addColorStop(0, "rgba(122,140,255,0.22)");
-  leftBeam.addColorStop(1, "rgba(122,140,255,0)");
-  ctx.fillStyle = leftBeam;
+  const leftGlow = ctx.createRadialGradient(220, 160, 20, 220, 160, 420);
+  leftGlow.addColorStop(0, "rgba(255,79,184,0.16)");
+  leftGlow.addColorStop(1, "rgba(255,79,184,0)");
+  ctx.fillStyle = leftGlow;
   ctx.fillRect(0, 0, width, height);
 
-  const rightBeam = ctx.createRadialGradient(width - 180, 120, 30, width - 180, 120, 400);
-  rightBeam.addColorStop(0, "rgba(199,103,255,0.18)");
-  rightBeam.addColorStop(1, "rgba(199,103,255,0)");
-  ctx.fillStyle = rightBeam;
+  const rightGlow = ctx.createRadialGradient(width - 220, 160, 20, width - 220, 160, 420);
+  rightGlow.addColorStop(0, "rgba(99,227,255,0.16)");
+  rightGlow.addColorStop(1, "rgba(99,227,255,0)");
+  ctx.fillStyle = rightGlow;
   ctx.fillRect(0, 0, width, height);
 
-  if (orbs) drawOrbs(ctx, orbs, frame, width, height);
-  if (sparkles) drawSparkles(ctx, sparkles, frame);
-  if (burstParticles) drawBurstParticles(ctx, burstParticles, frame);
-  if (backParticles) drawParticles(ctx, backParticles, frame, width, height);
-  if (frontParticles) drawParticles(ctx, frontParticles, frame, width, height);
+  drawSmashGlow(ctx, width, phase);
+
+  if (orbs) drawOrbs(ctx, orbs, phase);
+  if (sparkles) drawSparkles(ctx, sparkles, phase);
+  if (particles) drawParticles(ctx, particles, phase);
 }
 
-function drawHeaderShimmer(ctx, x, y, width, height, frame) {
-  const shimmerX = x - 100 + ((frame % 18) / 17) * (width + 200);
+function drawHeaderShimmer(ctx, x, y, width, height, phase) {
+  const t = (Math.sin(phase) + 1) / 2;
+  const shimmerX = x - 120 + t * (width + 240);
 
   ctx.save();
   drawRoundedRect(ctx, x, y, width, height, 28);
   ctx.clip();
 
-  const grad = ctx.createLinearGradient(shimmerX - 140, 0, shimmerX + 140, 0);
+  const grad = ctx.createLinearGradient(shimmerX - 150, 0, shimmerX + 150, 0);
   grad.addColorStop(0, "rgba(255,255,255,0)");
-  grad.addColorStop(0.35, "rgba(255,255,255,0.14)");
-  grad.addColorStop(0.5, "rgba(255,255,255,0.30)");
-  grad.addColorStop(0.65, "rgba(255,255,255,0.14)");
+  grad.addColorStop(0.35, "rgba(255,255,255,0.10)");
+  grad.addColorStop(0.5, "rgba(255,255,255,0.24)");
+  grad.addColorStop(0.65, "rgba(255,255,255,0.10)");
   grad.addColorStop(1, "rgba(255,255,255,0)");
   ctx.fillStyle = grad;
-  ctx.fillRect(shimmerX - 160, y, 320, height);
+  ctx.fillRect(shimmerX - 170, y, 340, height);
 
   ctx.restore();
 }
 
-function drawPodiumBlock(ctx, entry, x, y, width, height, frame) {
+function drawPodiumBlock(ctx, entry, x, y, width, height, phase) {
   const colors = getPlacementColors(entry.place);
-  const pulse = entry.place <= 3 ? 18 + (Math.sin(frame * 0.5 + entry.place) + 1) * 8 : 12;
+  const pulse = entry.place <= 3 ? 18 + (Math.sin(phase + entry.place) + 1) * 7 : 12;
   const avatarSize = entry.place === 1 ? 118 : 98;
 
   ctx.save();
@@ -471,7 +418,7 @@ function drawPodiumBlock(ctx, entry, x, y, width, height, frame) {
   ctx.fillText(placeText, badgeX + (badgeW - placeWidth) / 2, badgeY + 32);
 
   const avatarX = x + (width - avatarSize) / 2;
-  const avatarY = y + 84 + (entry.place === 1 ? Math.sin(frame * 0.65) * 6 : 0);
+  const avatarY = y + 84 + (entry.place === 1 ? Math.sin(phase) * 7 : Math.sin(phase + entry.place) * 3);
 
   if (entry.avatarImage) {
     drawCircleImage(ctx, entry.avatarImage, avatarX, avatarY, avatarSize);
@@ -484,7 +431,7 @@ function drawPodiumBlock(ctx, entry, x, y, width, height, frame) {
       0,
       Math.PI * 2
     );
-    ctx.strokeStyle = "rgba(255,255,255,0.34)";
+    ctx.strokeStyle = "rgba(255,255,255,0.36)";
     ctx.lineWidth = 3;
     ctx.stroke();
   } else {
@@ -514,18 +461,18 @@ function drawPodiumBlock(ctx, entry, x, y, width, height, frame) {
   ctx.font = entry.place === 1 ? "bold 34px SmashFont" : "bold 28px SmashFont";
   const name = truncateText(ctx, entry.canvasDisplayName, width - 46);
   const nameWidth = ctx.measureText(name).width;
-  ctx.fillText(name, x + (width - nameWidth) / 2, y + height - 82);
+  ctx.fillText(name, x + (width - nameWidth) / 2, y + height - 92);
 
   ctx.fillStyle = "#DCE6FF";
   ctx.font = "24px SmashFont";
   const rankText = `Rank #${entry.rank}`;
   const rankWidth = ctx.measureText(rankText).width;
-  ctx.fillText(rankText, x + (width - rankWidth) / 2, y + height - 48);
+  ctx.fillText(rankText, x + (width - rankWidth) / 2, y + height - 56);
 
   const recordPillW = 170;
   const recordPillH = 42;
   const recordPillX = x + (width - recordPillW) / 2;
-  const recordPillY = y + height - 128;
+  const recordPillY = y + height - 38;
 
   drawRoundedRect(ctx, recordPillX, recordPillY, recordPillW, recordPillH, 16);
   ctx.fillStyle = "rgba(255,255,255,0.10)";
@@ -555,9 +502,9 @@ function drawPodiumBlock(ctx, entry, x, y, width, height, frame) {
   }
 }
 
-function drawListCard(ctx, entry, x, y, width, height, frame) {
+function drawListCard(ctx, entry, x, y, width, height, phase) {
   const colors = getPlacementColors(entry.place);
-  const pulse = 10 + (Math.sin(frame * 0.3 + entry.place) + 1) * 2;
+  const pulse = 10 + (Math.sin(phase + entry.place * 0.35) + 1) * 2;
 
   ctx.save();
   ctx.shadowColor = colors.glow;
@@ -629,7 +576,7 @@ function drawListCard(ctx, entry, x, y, width, height, frame) {
   const recordPillW = 190;
   const recordPillH = 42;
   const recordPillX = x + width - recordPillW - 26;
-  const recordPillY = y + 22;
+  const recordPillY = y + 30;
 
   drawRoundedRect(ctx, recordPillX, recordPillY, recordPillW, recordPillH, 15);
   ctx.fillStyle = "rgba(255,255,255,0.10)";
@@ -642,27 +589,28 @@ function drawListCard(ctx, entry, x, y, width, height, frame) {
   ctx.fillText(recordText, recordPillX + (recordPillW - recordWidth) / 2, recordPillY + 28);
 }
 
-function drawLeaderboardFrame(ctx, entries, width, height, backParticles = null, frontParticles = null, orbs = null, sparkles = null, burstParticles = null, frame = 0) {
+function drawLeaderboardFrame(ctx, entries, width, height, particles = null, orbs = null, sparkles = null, phase = 0) {
   const outerPadding = 28;
   const headerHeight = 108;
 
-  drawBackground(ctx, width, height, backParticles, frontParticles, orbs, sparkles, burstParticles, frame);
+  drawBackground(ctx, width, height, particles, orbs, sparkles, phase);
 
   drawRoundedRect(ctx, outerPadding, outerPadding, width - outerPadding * 2, headerHeight, 28);
   const headerGrad = ctx.createLinearGradient(0, 0, width, 0);
-  headerGrad.addColorStop(0, "#1F245C");
-  headerGrad.addColorStop(0.45, "#3A1E7A");
-  headerGrad.addColorStop(1, "#0E5E7A");
+  headerGrad.addColorStop(0, "#241245");
+  headerGrad.addColorStop(0.36, "#3A1E7A");
+  headerGrad.addColorStop(0.7, "#1E3F82");
+  headerGrad.addColorStop(1, "#2A6B8C");
   ctx.fillStyle = headerGrad;
   ctx.fill();
 
-  drawHeaderShimmer(ctx, outerPadding, outerPadding, width - outerPadding * 2, headerHeight, frame);
+  drawHeaderShimmer(ctx, outerPadding, outerPadding, width - outerPadding * 2, headerHeight, phase);
 
   ctx.fillStyle = "#F7FAFF";
   ctx.font = "bold 42px SmashFont";
   ctx.fillText("SSBU LEADERBOARD", outerPadding + 34, outerPadding + 60);
 
-  ctx.fillStyle = "#BFD4FF";
+  ctx.fillStyle = "#D0DBFF";
   ctx.font = "22px SmashFont";
   ctx.fillText("Official Ranked Order", outerPadding + 34, outerPadding + 90);
 
@@ -686,9 +634,9 @@ function drawLeaderboardFrame(ctx, entries, width, height, backParticles = null,
     const second = topThree.find((e) => e.place === 2);
     const third = topThree.find((e) => e.place === 3);
 
-    if (second) drawPodiumBlock(ctx, second, leftX, sideY, sideW, sideH, frame);
-    if (first) drawPodiumBlock(ctx, first, centerX, centerY, centerW, centerH, frame);
-    if (third) drawPodiumBlock(ctx, third, rightX, sideY, sideW, sideH, frame);
+    if (second) drawPodiumBlock(ctx, second, leftX, sideY, sideW, sideH, phase);
+    if (first) drawPodiumBlock(ctx, first, centerX, centerY, centerW, centerH, phase);
+    if (third) drawPodiumBlock(ctx, third, rightX, sideY, sideW, sideH, phase);
   }
 
   if (rest.length > 0) {
@@ -701,7 +649,7 @@ function drawLeaderboardFrame(ctx, entries, width, height, backParticles = null,
     for (let i = 0; i < rest.length; i++) {
       const entry = rest[i];
       const y = listTop + i * (cardHeight + cardGap);
-      drawListCard(ctx, entry, cardX, y, cardW, cardHeight, frame);
+      drawListCard(ctx, entry, cardX, y, cardW, cardHeight, phase);
     }
   }
 }
@@ -729,32 +677,30 @@ async function generateAnimatedLeaderboardGif(rows, guild) {
   const encoder = new GIFEncoder(width, height);
   encoder.start();
   encoder.setRepeat(0);
-  encoder.setDelay(80);
+  encoder.setDelay(70);
   encoder.setQuality(10);
 
   const canvas = createCanvas(width, height);
   const ctx = canvas.getContext("2d");
 
-  const backParticles = createParticles(width, height, 90, "back");
-  const frontParticles = createParticles(width, height, 130, "front");
+  const particles = createParticles(width, height, 125);
   const orbs = createEnergyOrbs(width, height, 16);
   const sparkles = createSparkles(width, height, 20);
-  const burstParticles = createBurstParticles(width, 78);
 
-  const frameCount = 24;
+  const frameCount = 30;
+
   for (let frame = 0; frame < frameCount; frame++) {
+    const phase = (frame / frameCount) * Math.PI * 2;
     ctx.clearRect(0, 0, width, height);
     drawLeaderboardFrame(
       ctx,
       entries,
       width,
       height,
-      backParticles,
-      frontParticles,
+      particles,
       orbs,
       sparkles,
-      burstParticles,
-      frame
+      phase
     );
     encoder.addFrame(ctx);
   }
